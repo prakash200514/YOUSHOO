@@ -7,11 +7,22 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$host = '127.0.0.1';
-$port = '3306';
-$user = 'root';
-$pass = 'password';
-$dbname = 'youshoo_db';
+// Parse database credentials from environment variables or local defaults
+$dbUrl = getenv('DATABASE_URL') ?: getenv('MYSQL_URL');
+if ($dbUrl) {
+    $urlParts = parse_url($dbUrl);
+    $host = $urlParts['host'] ?? '127.0.0.1';
+    $port = $urlParts['port'] ?? 3306;
+    $user = $urlParts['user'] ?? 'root';
+    $pass = $urlParts['pass'] ?? '';
+    $dbname = ltrim($urlParts['path'] ?? 'youshoo_db', '/');
+} else {
+    $host = getenv('DB_HOST') ?: '127.0.0.1';
+    $port = getenv('DB_PORT') ?: '3306';
+    $dbname = getenv('DB_NAME') ?: 'youshoo_db';
+    $user = getenv('DB_USER') ?: 'root';
+    $pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'password';
+}
 
 echo "<pre style='font-family: Consolas, monospace; background: #1a1a2e; color: #e94560; padding: 20px; border-radius: 8px;'>";
 echo "====================================================\n";
@@ -19,18 +30,21 @@ echo "  MEESHO E-COMMERCE PLATFORM - DATABASE INITIALIZER \n";
 echo "====================================================\n\n";
 
 try {
-    // 1. Connect to MySQL server
-    $pdo = new PDO("mysql:host=$host;port=$port;charset=utf8mb4", $user, $pass, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-    ]);
-    echo "[OK] Connected to MySQL server successfully.\n";
-
-    // 2. Create Database
-    $pdo->exec("CREATE DATABASE IF NOT EXISTS `$dbname` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-    echo "[OK] Database `$dbname` ensured.\n";
-
-    $pdo->exec("USE `$dbname`");
-    echo "[OK] Switched to `$dbname`.\n\n";
+    // 1. Connect directly to database (works for cloud DBs and existing DBs)
+    try {
+        $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $user, $pass, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        ]);
+        echo "[OK] Connected to database `$dbname` on `$host`.\n\n";
+    } catch (PDOException $e) {
+        // Fallback: connect to server and create database (works on localhost)
+        $pdo = new PDO("mysql:host=$host;port=$port;charset=utf8mb4", $user, $pass, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        ]);
+        $pdo->exec("CREATE DATABASE IF NOT EXISTS `$dbname` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $pdo->exec("USE `$dbname`");
+        echo "[OK] Created and switched to database `$dbname` on `$host`.\n\n";
+    }
 
     // 3. Create Tables
     $queries = [

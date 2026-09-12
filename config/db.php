@@ -3,12 +3,28 @@
  * Meesho E-Commerce Platform - Database Configuration
  */
 
-// Define database credentials
-define('DB_HOST', '127.0.0.1');
-define('DB_PORT', '3306');
-define('DB_NAME', 'youshoo_db');
-define('DB_USER', 'root');
-define('DB_PASS', 'password');
+// Parse database credentials from environment variables or use local XAMPP defaults
+$dbUrl = getenv('DATABASE_URL') ?: getenv('MYSQL_URL');
+if ($dbUrl) {
+    $urlParts = parse_url($dbUrl);
+    $host = $urlParts['host'] ?? '127.0.0.1';
+    $port = $urlParts['port'] ?? 3306;
+    $user = $urlParts['user'] ?? 'root';
+    $pass = $urlParts['pass'] ?? '';
+    $dbname = ltrim($urlParts['path'] ?? 'youshoo_db', '/');
+} else {
+    $host = getenv('DB_HOST') ?: '127.0.0.1';
+    $port = getenv('DB_PORT') ?: '3306';
+    $dbname = getenv('DB_NAME') ?: 'youshoo_db';
+    $user = getenv('DB_USER') ?: 'root';
+    $pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'password';
+}
+
+define('DB_HOST', $host);
+define('DB_PORT', $port);
+define('DB_NAME', $dbname);
+define('DB_USER', $user);
+define('DB_PASS', $pass);
 
 /**
  * Get PDO Database Connection
