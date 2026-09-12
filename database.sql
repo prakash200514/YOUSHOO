@@ -38,10 +38,8 @@ INSERT INTO `users` (`id`, `full_name`, `email`, `phone`, `password_hash`, `role
 ('3', 'Vaidehi Fashion Hub', 'vaidehi@meesho.com', '9820044556', '$2y$10$UBw7mTbGGG25hrU0bClFhue7j1FpKR8FXgyLlPpmHgKElI0HKFPHO', 'supplier', 'active', NULL, '2026-09-12 10:13:39', '2026-09-12 10:13:39'),
 ('4', 'Urban Kidz Store', 'urbankids@meesho.com', '9820077889', '$2y$10$UBw7mTbGGG25hrU0bClFhue7j1FpKR8FXgyLlPpmHgKElI0HKFPHO', 'supplier', 'active', NULL, '2026-09-12 10:13:39', '2026-09-12 10:13:39'),
 ('5', 'Home Bliss Living', 'homebliss@meesho.com', '9820099001', '$2y$10$UBw7mTbGGG25hrU0bClFhue7j1FpKR8FXgyLlPpmHgKElI0HKFPHO', 'supplier', 'active', NULL, '2026-09-12 10:13:39', '2026-09-12 10:13:39'),
-('6', 'Priya Sharma', 'customer@meesho.com', '9123456780', '$2y$10$yho0pZLkKHqPCMsDJtC./ORtPWFYsugJBm2YnabGtLHGoSffMh7ES', 'customer', 'active', NULL, '2026-09-12 10:13:39', '2026-09-12 10:13:39'),
 ('7', 'Admin User', 'admin@youshoo.com', '9876543210', '$2y$10$fSh0EHMbu9yf4XpIeK8RlO6UMQP6NJF9eKus8T.WDiNy1tZh89k3O', 'admin', 'active', NULL, '2026-09-12 10:38:07', '2026-09-12 10:38:07'),
-('8', 'Kashvi Textiles', 'supplier@youshoo.com', '9820011223', '$2y$10$jpVqTtDBBmNqzT5fWt6s1.LAOYjsGUh.ky0vbeQxIAN2404P7gVe6', 'supplier', 'active', NULL, '2026-09-12 10:38:07', '2026-09-12 10:38:07'),
-('9', 'Priya Sharma', 'customer@youshoo.com', '9123456780', '$2y$10$vS0V.V0RFOWp6is96hDJ2OAu.KMSeGeXN2/QRapY89KzYNUkm6ojy', 'customer', 'active', NULL, '2026-09-12 10:38:07', '2026-09-12 10:38:07');
+('8', 'Kashvi Textiles', 'supplier@youshoo.com', '9820011223', '$2y$10$jpVqTtDBBmNqzT5fWt6s1.LAOYjsGUh.ky0vbeQxIAN2404P7gVe6', 'supplier', 'active', NULL, '2026-09-12 10:38:07', '2026-09-12 10:38:07');
 
 -- --------------------------------------------------------
 -- Table structure for table `suppliers`
@@ -272,8 +270,8 @@ CREATE TABLE `orders` (
 
 -- Dumping data for table `orders`
 INSERT INTO `orders` (`id`, `order_number`, `user_id`, `total_amount`, `discount_amount`, `delivery_fee`, `final_amount`, `payment_method`, `payment_status`, `order_status`, `shipping_name`, `shipping_phone`, `shipping_address`, `shipping_city`, `shipping_state`, `shipping_pincode`, `created_at`, `updated_at`) VALUES
-('1', 'YSH-5FAEC6CB', '6', '499.00', '0.00', '0.00', '499.00', 'cod', 'pending', 'confirmed', 'Priya Sharma', '9123456780', 'Flat 402, Sai Residency, MG Road', 'Mumbai', 'Maharashtra', '400001', '2026-09-12 10:13:40', '2026-09-12 11:04:22'),
-('2', 'YSH-4E55064C', '6', '599.00', '0.00', '0.00', '599.00', 'cod', 'paid', 'delivered', 'Priya Sharma', '9123456780', 'Flat 402, Sai Residency, MG Road', 'Mumbai', 'Maharashtra', '400001', '2026-09-12 10:13:40', '2026-09-12 11:04:22'),
+('1', 'YSH-5FAEC6CB', NULL, '499.00', '0.00', '0.00', '499.00', 'cod', 'pending', 'confirmed', 'Priya Sharma', '9123456780', 'Flat 402, Sai Residency, MG Road', 'Mumbai', 'Maharashtra', '400001', '2026-09-12 10:13:40', '2026-09-12 11:04:22'),
+('2', 'YSH-4E55064C', NULL, '599.00', '0.00', '0.00', '599.00', 'cod', 'paid', 'delivered', 'Priya Sharma', '9123456780', 'Flat 402, Sai Residency, MG Road', 'Mumbai', 'Maharashtra', '400001', '2026-09-12 10:13:40', '2026-09-12 11:04:22'),
 ('3', 'YSH-FAA53B8A', NULL, '3798.00', '2800.00', '0.00', '998.00', 'cod', 'pending', 'placed', 'Aditi Sharma', '9876543210', 'Flat 302, Galaxy Heights, Linking Road', 'Mumbai', 'Maharashtra', '400050', '2026-09-12 10:23:14', '2026-09-12 11:04:22');
 
 -- --------------------------------------------------------

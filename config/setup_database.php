@@ -217,8 +217,7 @@ try {
         ['Kashvi Textiles', 'supplier@youshoo.com', '9820011223', $passwordSeller, 'supplier'],
         ['Vaidehi Fashion Hub', 'vaidehi@youshoo.com', '9820044556', $passwordSeller, 'supplier'],
         ['Urban Kidz Store', 'urbankids@youshoo.com', '9820077889', $passwordSeller, 'supplier'],
-        ['Home Bliss Living', 'homebliss@youshoo.com', '9820099001', $passwordSeller, 'supplier'],
-        ['Priya Sharma', 'customer@youshoo.com', '9123456780', $passwordUser, 'customer']
+        ['Home Bliss Living', 'homebliss@youshoo.com', '9820099001', $passwordSeller, 'supplier']
     ];
 
     $stmtUserCheck = $pdo->prepare("SELECT id FROM users WHERE email = ?");
@@ -814,7 +813,7 @@ try {
                 ['Komal R.', 5, 'Meesho delivered earlier than expected! Awesome fitting and beautiful color shine. 100% recommended!', 42]
             ];
             foreach ($sampleReviews as $rev) {
-                $stmtReviewInsert->execute([$productId, $userIds['customer@meesho.com'], $rev[0], $rev[1], $rev[2], $rev[3]]);
+                $stmtReviewInsert->execute([$productId, null, $rev[0], $rev[1], $rev[2], $rev[3]]);
             }
         } else {
             echo "[*] Product already exists: {$p['title']}\n";
@@ -832,8 +831,8 @@ try {
             $total1 = $prods[0]['price'];
             $stmtOrd = $pdo->prepare("INSERT INTO orders 
                 (order_number, user_id, total_amount, discount_amount, delivery_fee, final_amount, payment_method, payment_status, order_status, shipping_name, shipping_phone, shipping_address, shipping_city, shipping_state, shipping_pincode) 
-                VALUES (?, ?, ?, 0.00, 0.00, ?, 'cod', 'pending', 'confirmed', 'Priya Sharma', '9123456780', 'Flat 402, Sai Residency, MG Road', 'Mumbai', 'Maharashtra', '400001')");
-            $stmtOrd->execute([$orderNum1, $userIds['customer@meesho.com'], $total1, $total1]);
+                VALUES (?, NULL, ?, 0.00, 0.00, ?, 'cod', 'pending', 'confirmed', 'Priya Sharma', '9123456780', 'Flat 402, Sai Residency, MG Road', 'Mumbai', 'Maharashtra', '400001')");
+            $stmtOrd->execute([$orderNum1, $total1, $total1]);
             $ordId1 = $pdo->lastInsertId();
 
             $pImg1 = $pdo->query("SELECT image_url FROM product_images WHERE product_id = {$prods[0]['id']} LIMIT 1")->fetchColumn();
@@ -843,7 +842,7 @@ try {
             // Order 2 (Delivered)
             $orderNum2 = "MEESH-" . strtoupper(bin2hex(random_bytes(4)));
             $total2 = $prods[1]['price'];
-            $stmtOrd->execute([$orderNum2, $userIds['customer@meesho.com'], $total2, $total2]);
+            $stmtOrd->execute([$orderNum2, $total2, $total2]);
             $ordId2 = $pdo->lastInsertId();
             $pdo->query("UPDATE orders SET order_status = 'delivered', payment_status = 'paid' WHERE id = $ordId2");
 
@@ -861,7 +860,7 @@ try {
     echo "DEFAULT DEMO ACCOUNTS:\n";
     echo "1. Admin Portal:     admin@youshoo.com     / admin123\n";
     echo "2. Supplier Hub:     supplier@youshoo.com  / seller123\n";
-    echo "3. Customer Account: customer@youshoo.com  / user123\n\n";
+    echo "Customer Account:    Register a new customer account at /MEESHO/auth.php then login\n\n";
     echo "<a href='../index.php' style='display:inline-block; padding:10px 20px; background:#9f2089; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold;'>Go to Youshoo Storefront &rarr;</a>\n";
     echo "</pre>";
 

@@ -2,21 +2,22 @@
 /**
  * Customer Orders & Tracking Timeline
  */
+require_once __DIR__ . '/includes/auth_helper.php';
+
+if (!is_logged_in()) {
+    header("Location: /MEESHO/auth.php?redirect=orders&msg=orders_required");
+    exit;
+}
+
 $pageTitle = "My Orders";
 require_once __DIR__ . '/includes/header.php';
 
 $pdo = getDBConnection();
-$userId = $_SESSION['user_id'] ?? null;
+$userId = $_SESSION['user_id'];
 
-// Fetch Orders
-if ($userId) {
-    $stmt = $pdo->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC");
-    $stmt->execute([$userId]);
-} else {
-    // Show recent orders for demonstration if guest
-    $stmt = $pdo->prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT 5");
-    $stmt->execute();
-}
+// Fetch Orders for logged in customer
+$stmt = $pdo->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC");
+$stmt->execute([$userId]);
 $orders = $stmt->fetchAll();
 
 // Handle Review Submission

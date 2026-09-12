@@ -93,6 +93,8 @@ $allCategories = $stmtCat->fetchAll();
                   <?php endif; ?>
                   <li><a href="/MEESHO/logout.php" style="color:#dc2626;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 <?php else: ?>
+                  <li><a href="/MEESHO/auth.php?tab=register"><i class="fas fa-user-plus"></i> Create Customer Account</a></li>
+                  <li><a href="/MEESHO/orders.php"><i class="fas fa-box-open"></i> My Orders</a></li>
                   <li><a href="/MEESHO/supplier/index.php"><i class="fas fa-briefcase"></i> Supplier Hub</a></li>
                 <?php endif; ?>
               </ul>

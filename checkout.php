@@ -165,23 +165,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 </div>
                 <div>
                   <label style="display:block; font-size:12.5px; font-weight:600; color:#444; margin-bottom:6px;">Phone Number *</label>
-                  <input type="tel" name="shipping_phone" required value="<?php echo htmlspecialchars($currentUser['phone'] ?? '9876543210'); ?>" style="width:100%; padding:10px 14px; border:1px solid #d5d8de; border-radius:6px; font-size:14px; outline:none;">
+                  <input type="tel" name="shipping_phone" required placeholder="10-digit Mobile Number" value="<?php echo htmlspecialchars($currentUser['phone'] ?? ''); ?>" style="width:100%; padding:10px 14px; border:1px solid #d5d8de; border-radius:6px; font-size:14px; outline:none;">
                 </div>
                 <div style="grid-column: 1 / -1;">
                   <label style="display:block; font-size:12.5px; font-weight:600; color:#444; margin-bottom:6px;">House No. / Building / Street Address *</label>
-                  <input type="text" name="shipping_address" required placeholder="Flat 204, Rose Garden Apartments, MG Road" style="width:100%; padding:10px 14px; border:1px solid #d5d8de; border-radius:6px; font-size:14px; outline:none;">
+                  <input type="text" name="shipping_address" required placeholder="House/Flat No., Building Name, Street" style="width:100%; padding:10px 14px; border:1px solid #d5d8de; border-radius:6px; font-size:14px; outline:none;">
                 </div>
                 <div>
                   <label style="display:block; font-size:12.5px; font-weight:600; color:#444; margin-bottom:6px;">City *</label>
-                  <input type="text" name="shipping_city" required value="Mumbai" style="width:100%; padding:10px 14px; border:1px solid #d5d8de; border-radius:6px; font-size:14px; outline:none;">
+                  <input type="text" name="shipping_city" required placeholder="City" value="<?php echo htmlspecialchars($_POST['shipping_city'] ?? ''); ?>" style="width:100%; padding:10px 14px; border:1px solid #d5d8de; border-radius:6px; font-size:14px; outline:none;">
                 </div>
                 <div>
                   <label style="display:block; font-size:12.5px; font-weight:600; color:#444; margin-bottom:6px;">State *</label>
-                  <input type="text" name="shipping_state" required value="Maharashtra" style="width:100%; padding:10px 14px; border:1px solid #d5d8de; border-radius:6px; font-size:14px; outline:none;">
+                  <input type="text" name="shipping_state" required placeholder="State" value="<?php echo htmlspecialchars($_POST['shipping_state'] ?? ''); ?>" style="width:100%; padding:10px 14px; border:1px solid #d5d8de; border-radius:6px; font-size:14px; outline:none;">
                 </div>
                 <div>
                   <label style="display:block; font-size:12.5px; font-weight:600; color:#444; margin-bottom:6px;">Pincode *</label>
-                  <input type="text" name="shipping_pincode" required value="400001" maxlength="6" style="width:100%; padding:10px 14px; border:1px solid #d5d8de; border-radius:6px; font-size:14px; outline:none;">
+                  <input type="text" name="shipping_pincode" required placeholder="6-digit Pincode" value="<?php echo htmlspecialchars($_POST['shipping_pincode'] ?? ''); ?>" maxlength="6" style="width:100%; padding:10px 14px; border:1px solid #d5d8de; border-radius:6px; font-size:14px; outline:none;">
                 </div>
               </div>
             </div>
