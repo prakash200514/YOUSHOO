@@ -33,11 +33,16 @@ $pdoOptions = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 ];
 if ($host !== '127.0.0.1' && $host !== 'localhost') {
-    if (file_exists('/etc/ssl/certs/ca-certificates.crt')) {
-        $pdoOptions[PDO::MYSQL_ATTR_SSL_CA] = '/etc/ssl/certs/ca-certificates.crt';
-    }
-    if (defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')) {
-        $pdoOptions[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+    $caCandidates = [
+        '/etc/ssl/certs/ca-certificates.crt',
+        '/etc/pki/tls/certs/ca-bundle.crt',
+        'c:\\xampp\\apache\\bin\\curl-ca-bundle.crt'
+    ];
+    foreach ($caCandidates as $ca) {
+        if (file_exists($ca)) {
+            $pdoOptions[PDO::MYSQL_ATTR_SSL_CA] = $ca;
+            break;
+        }
     }
 }
 
