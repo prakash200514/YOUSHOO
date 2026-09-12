@@ -213,12 +213,12 @@ try {
     $passwordUser = password_hash('user123', PASSWORD_DEFAULT);
 
     $usersData = [
-        ['Admin User', 'admin@meesho.com', '9876543210', $passwordAdmin, 'admin'],
-        ['Kashvi Textiles', 'supplier@meesho.com', '9820011223', $passwordSeller, 'supplier'],
-        ['Vaidehi Fashion Hub', 'vaidehi@meesho.com', '9820044556', $passwordSeller, 'supplier'],
-        ['Urban Kidz Store', 'urbankids@meesho.com', '9820077889', $passwordSeller, 'supplier'],
-        ['Home Bliss Living', 'homebliss@meesho.com', '9820099001', $passwordSeller, 'supplier'],
-        ['Priya Sharma', 'customer@meesho.com', '9123456780', $passwordUser, 'customer']
+        ['Admin User', 'admin@youshoo.com', '9876543210', $passwordAdmin, 'admin'],
+        ['Kashvi Textiles', 'supplier@youshoo.com', '9820011223', $passwordSeller, 'supplier'],
+        ['Vaidehi Fashion Hub', 'vaidehi@youshoo.com', '9820044556', $passwordSeller, 'supplier'],
+        ['Urban Kidz Store', 'urbankids@youshoo.com', '9820077889', $passwordSeller, 'supplier'],
+        ['Home Bliss Living', 'homebliss@youshoo.com', '9820099001', $passwordSeller, 'supplier'],
+        ['Priya Sharma', 'customer@youshoo.com', '9123456780', $passwordUser, 'customer']
     ];
 
     $stmtUserCheck = $pdo->prepare("SELECT id FROM users WHERE email = ?");
@@ -856,13 +856,13 @@ try {
     }
 
     echo "\n====================================================\n";
-    echo "  [SUCCESS] MEESHO DATABASE SETUP COMPLETED!\n";
+    echo "  [SUCCESS] YOUSHOO DATABASE SETUP COMPLETED!\n";
     echo "====================================================\n\n";
     echo "DEFAULT DEMO ACCOUNTS:\n";
-    echo "1. Admin Portal:     admin@meesho.com     / admin123\n";
-    echo "2. Supplier Hub:     supplier@meesho.com  / seller123\n";
-    echo "3. Customer Account: customer@meesho.com  / user123\n\n";
-    echo "<a href='../index.php' style='display:inline-block; padding:10px 20px; background:#9f2089; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold;'>Go to Meesho Storefront &rarr;</a>\n";
+    echo "1. Admin Portal:     admin@youshoo.com     / admin123\n";
+    echo "2. Supplier Hub:     supplier@youshoo.com  / seller123\n";
+    echo "3. Customer Account: customer@youshoo.com  / user123\n\n";
+    echo "<a href='../index.php' style='display:inline-block; padding:10px 20px; background:#9f2089; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold;'>Go to Youshoo Storefront &rarr;</a>\n";
     echo "</pre>";
 
 } catch (Exception $e) {
