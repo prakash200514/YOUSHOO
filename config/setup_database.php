@@ -29,18 +29,26 @@ echo "====================================================\n";
 echo "  MEESHO E-COMMERCE PLATFORM - DATABASE INITIALIZER \n";
 echo "====================================================\n\n";
 
+$pdoOptions = [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+];
+if ($host !== '127.0.0.1' && $host !== 'localhost') {
+    if (file_exists('/etc/ssl/certs/ca-certificates.crt')) {
+        $pdoOptions[PDO::MYSQL_ATTR_SSL_CA] = '/etc/ssl/certs/ca-certificates.crt';
+    }
+    if (defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')) {
+        $pdoOptions[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+    }
+}
+
 try {
     // 1. Connect directly to database (works for cloud DBs and existing DBs)
     try {
-        $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $user, $pass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-        ]);
+        $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $user, $pass, $pdoOptions);
         echo "[OK] Connected to database `$dbname` on `$host`.\n\n";
     } catch (PDOException $e) {
         // Fallback: connect to server and create database (works on localhost)
-        $pdo = new PDO("mysql:host=$host;port=$port;charset=utf8mb4", $user, $pass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-        ]);
+        $pdo = new PDO("mysql:host=$host;port=$port;charset=utf8mb4", $user, $pass, $pdoOptions);
         $pdo->exec("CREATE DATABASE IF NOT EXISTS `$dbname` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
         $pdo->exec("USE `$dbname`");
         echo "[OK] Created and switched to database `$dbname` on `$host`.\n\n";
