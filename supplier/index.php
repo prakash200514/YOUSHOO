@@ -115,7 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </a>
       <div style="display:flex; gap:16px; align-items:center;">
         <a href="/MEESHO/index.php" style="font-size:13px; font-weight:600; color:#555;">&larr; Back to Shopping</a>
-        <a href="/MEESHO/admin/login.php" style="font-size:13px; color:#888;">Admin Suite</a>
       </div>
     </div>
   </header>

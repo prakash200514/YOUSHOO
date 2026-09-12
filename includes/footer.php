@@ -46,7 +46,6 @@
             <li><a href="/MEESHO/supplier/index.php" style="color:#9f2089; font-weight:700;">Start Selling at 0% Commission</a></li>
             <li><a href="/MEESHO/supplier/index.php">Supplier Registration</a></li>
             <li><a href="/MEESHO/supplier/index.php">Supplier Login</a></li>
-            <li><a href="/MEESHO/admin/login.php">Admin Management Suite</a></li>
             <li><a href="#">Shipping & Returns Policy</a></li>
           </ul>
         </div>
@@ -61,7 +60,6 @@
           </p>
           <div style="background:#fdfafc; border:1px solid #f9d5ef; padding:12px; border-radius:8px;">
             <div style="font-size:12px; font-weight:700; color:#56034c; margin-bottom:4px;">Demo Accounts:</div>
-            <div style="font-size:11.5px; color:#555;"><strong>Admin:</strong> admin@youshoo.com / admin123</div>
             <div style="font-size:11.5px; color:#555;"><strong>Supplier:</strong> supplier@youshoo.com / seller123</div>
             <div style="font-size:11.5px; color:#555;"><strong>Customer:</strong> customer@youshoo.com / user123</div>
           </div>

@@ -65,7 +65,7 @@ function require_supplier($redirectUrl = '/MEESHO/supplier/index.php') {
     }
 }
 
-function require_admin($redirectUrl = '/MEESHO/admin/login.php') {
+function require_admin($redirectUrl = '/MEESHO/admin.php') {
     if (!is_admin()) {
         header("Location: $redirectUrl");
         exit();

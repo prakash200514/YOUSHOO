@@ -65,12 +65,6 @@ $allCategories = $stmtCat->fetchAll();
             <span>Become a Supplier</span>
           </a>
 
-          <!-- Admin Portal Link -->
-          <a href="/MEESHO/admin/index.php" class="nav-link-btn admin-cta">
-            <i class="fas fa-shield-alt"></i>
-            <span>Admin</span>
-          </a>
-
           <!-- Profile Dropdown -->
           <div class="profile-menu-container">
             <div class="profile-trigger">
@@ -100,7 +94,6 @@ $allCategories = $stmtCat->fetchAll();
                   <li><a href="/MEESHO/logout.php" style="color:#dc2626;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 <?php else: ?>
                   <li><a href="/MEESHO/supplier/index.php"><i class="fas fa-briefcase"></i> Supplier Hub</a></li>
-                  <li><a href="/MEESHO/admin/login.php"><i class="fas fa-lock"></i> Admin Portal</a></li>
                 <?php endif; ?>
               </ul>
             </div>
