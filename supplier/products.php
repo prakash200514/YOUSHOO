@@ -73,15 +73,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_product'])) {
         if (empty($title) || $categoryId <= 0 || $price <= 0 || $mrp <= 0) {
             $err = "Please fill in product title, valid category, selling price, and MRP.";
         } else {
+            // Process Size-Specific Pricing if enabled
+            $sizePrices = [];
+            if (!empty($_POST['enable_size_pricing']) && !empty($_POST['size_price']) && is_array($_POST['size_price'])) {
+                foreach ($_POST['size_price'] as $sName => $sPrice) {
+                    $sNameClean = trim($sName);
+                    $sPriceVal = (float)$sPrice;
+                    $sMrpVal = isset($_POST['size_mrp'][$sName]) && (float)$_POST['size_mrp'][$sName] > 0
+                        ? (float)$_POST['size_mrp'][$sName]
+                        : ($sPriceVal * 1.5);
+
+                    if ($sPriceVal > 0 && !empty($sNameClean)) {
+                        $sizePrices[$sNameClean] = [
+                            'price' => $sPriceVal,
+                            'mrp'   => $sMrpVal
+                        ];
+                    }
+                }
+
+                if (!empty($sizePrices)) {
+                    // Set base catalog price to lowest size price
+                    $minP = null;
+                    $minM = null;
+                    foreach ($sizePrices as $sp) {
+                        if ($minP === null || $sp['price'] < $minP) {
+                            $minP = $sp['price'];
+                            $minM = $sp['mrp'];
+                        }
+                    }
+                    if ($minP !== null) {
+                        $price = $minP;
+                        $mrp = $minM;
+                    }
+                }
+            }
+            $sizePricesJson = !empty($sizePrices) ? json_encode($sizePrices) : null;
+
             if ($mrp < $price) $mrp = $price * 1.5;
             $discount = round((($mrp - $price) / $mrp) * 100);
             $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title))) . '-' . time();
             $sku = 'SKU-' . strtoupper(substr(md5(uniqid()), 0, 8));
 
             $stmtIns = $pdo->prepare("INSERT INTO products 
-                (supplier_id, category_id, title, slug, description, price, mrp, discount_percent, stock, sku, sizes, colors, fabric, free_delivery, cod_available, rating_avg, rating_count, status, is_featured)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, 4.3, 10, 'approved', 0)");
-            $stmtIns->execute([$supplierId, $categoryId, $title, $slug, $description, $price, $mrp, $discount, $stock, $sku, $sizes, $colors, $fabric]);
+                (supplier_id, category_id, title, slug, description, price, mrp, discount_percent, stock, sku, sizes, size_prices, colors, fabric, free_delivery, cod_available, rating_avg, rating_count, status, is_featured)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, 4.3, 10, 'approved', 0)");
+            $stmtIns->execute([$supplierId, $categoryId, $title, $slug, $description, $price, $mrp, $discount, $stock, $sku, $sizes, $sizePricesJson, $colors, $fabric]);
             $newProdId = $pdo->lastInsertId();
 
             // Add Image
@@ -207,8 +243,14 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
                   </td>
                   <td><?php echo htmlspecialchars($p['category_name']); ?></td>
                   <td>
-                    <strong style="color:#038d63;">₹<?php echo number_format($p['price'], 0); ?></strong>
+                    <?php 
+                      $hasSizePrices = !empty($p['size_prices']);
+                    ?>
+                    <strong style="color:#038d63;"><?php echo $hasSizePrices ? 'From ' : ''; ?>₹<?php echo number_format($p['price'], 0); ?></strong>
                     <div style="font-size:11px; color:#888; text-decoration:line-through;">₹<?php echo number_format($p['mrp'], 0); ?></div>
+                    <?php if ($hasSizePrices): ?>
+                      <div style="margin-top:2px;"><span style="display:inline-block; font-size:10px; background:#fdf2f8; color:#9f2089; border:1px solid #fbcfe8; padding:1px 5px; border-radius:4px; font-weight:700;"><i class="fas fa-tags" style="font-size:9px;"></i> Size Prices</span></div>
+                    <?php endif; ?>
                   </td>
                   <td><span style="font-weight:700; color:#038d63;"><?php echo $p['discount_percent']; ?>% off</span></td>
                   <td>
@@ -304,6 +346,38 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
             <label style="display:block; font-size:12.5px; font-weight:700; color:#333; margin-bottom:4px;">Colors</label>
             <input type="text" name="colors" id="colors_input" value="Red, Navy Blue, Green" placeholder="e.g. Gold, Silver, Rose Gold" style="width:100%; padding:10px 12px; border:1px solid #d5d8de; border-radius:6px; font-size:13.5px; outline:none;">
             <div style="font-size:10.5px; color:#777; margin-top:5px;">Comma-separated color variants</div>
+          </div>
+        </div>
+
+        <!-- Size-Specific Pricing Toggle & Dynamic Table -->
+        <div style="background:#fdf2f8; border:1px solid #fbcfe8; border-radius:8px; padding:13px 15px; margin-bottom:16px;">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:700; color:#831843; font-size:13px; margin:0;">
+            <input type="checkbox" id="enable_size_pricing" name="enable_size_pricing" value="1" onchange="toggleSizePricingTable()" style="accent-color:#9f2089; width:16px; height:16px; cursor:pointer;">
+            <span><i class="fas fa-tags" style="color:#9f2089; margin-right:3px;"></i> Set Different Price for Each Size (e.g. S: ₹450, M: ₹550, L: ₹650)</span>
+          </label>
+          <div style="font-size:11.5px; color:#9d174d; margin-top:3px; margin-left:24px;">
+            Enable this if product price varies according to size. You can customize selling price and MRP for each selected size.
+          </div>
+
+          <div id="size_pricing_table_wrap" style="display:none; margin-top:12px;">
+            <div style="background:#ffffff; border:1px solid #f472b6; border-radius:6px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+              <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+                <thead style="background:#fce7f3; color:#831843; text-align:left;">
+                  <tr>
+                    <th style="padding:9px 12px; font-weight:700; border-bottom:1px solid #fbcfe8;">Size</th>
+                    <th style="padding:9px 12px; font-weight:700; border-bottom:1px solid #fbcfe8;">Selling Price (₹) *</th>
+                    <th style="padding:9px 12px; font-weight:700; border-bottom:1px solid #fbcfe8;">MRP (₹)</th>
+                    <th style="padding:9px 12px; font-weight:700; border-bottom:1px solid #fbcfe8;">Discount</th>
+                  </tr>
+                </thead>
+                <tbody id="size_pricing_tbody">
+                  <!-- Generated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+            <div style="font-size:11px; color:#666; margin-top:6px;">
+              💡 <em>Note: The lowest size price will be shown as the starting catalog price on search and browse cards.</em>
+            </div>
           </div>
         </div>
 
@@ -521,38 +595,129 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
       }
 
       renderSizeChips();
+      updateSizePricingRows();
     }
 
-    function renderSizeChips() {
-      var container = document.getElementById('size_chips_container');
+    function toggleSizePricingTable() {
+      var chk = document.getElementById('enable_size_pricing');
+      var wrap = document.getElementById('size_pricing_table_wrap');
+      if (wrap) {
+        wrap.style.display = (chk && chk.checked) ? 'block' : 'none';
+      }
+      if (chk && chk.checked) {
+        updateSizePricingRows();
+      }
+    }
+
+    var sizePriceCache = {};
+
+    function updateSizePricingRows() {
+      var chk = document.getElementById('enable_size_pricing');
+      if (!chk || !chk.checked) return;
+
+      var tbody = document.getElementById('size_pricing_tbody');
       var sizesInput = document.getElementById('sizes_input');
-      if (!container || !sizesInput) return;
+      if (!tbody || !sizesInput) return;
 
-      var preset = categoryPresets[currentCategoryKey] || categoryPresets['apparel'];
-      var currentSizes = sizesInput.value.split(',').map(function(s) { return s.trim().toLowerCase(); }).filter(Boolean);
-
-      container.innerHTML = '';
-      preset.chips.forEach(function(chip) {
-        var isSelected = currentSizes.indexOf(chip.toLowerCase()) !== -1;
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.innerText = (isSelected ? '✓ ' : '+ ') + chip;
-        btn.style.padding = '3px 9px';
-        btn.style.borderRadius = '12px';
-        btn.style.fontSize = '11px';
-        btn.style.fontWeight = isSelected ? '700' : '600';
-        btn.style.cursor = 'pointer';
-        btn.style.border = isSelected ? '1px solid #9f2089' : '1px solid #d5d8de';
-        btn.style.background = isSelected ? '#9f2089' : '#f9fafb';
-        btn.style.color = isSelected ? '#ffffff' : '#374151';
-        btn.style.transition = 'all 0.15s ease';
-
-        btn.onclick = function() {
-          toggleSizeChip(chip);
-        };
-
-        container.appendChild(btn);
+      // Save currently typed values before re-rendering
+      var existingInputs = tbody.querySelectorAll('input[data-sizename]');
+      existingInputs.forEach(function(inp) {
+        var sName = inp.getAttribute('data-sizename');
+        var field = inp.getAttribute('data-field');
+        if (!sizePriceCache[sName]) sizePriceCache[sName] = {};
+        sizePriceCache[sName][field] = inp.value;
       });
+
+      var rawSizes = sizesInput.value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+      tbody.innerHTML = '';
+
+      if (rawSizes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="padding:14px; text-align:center; color:#888;">No sizes specified yet. Please enter sizes above.</td></tr>';
+        return;
+      }
+
+      var basePriceInput = document.querySelector('input[name="price"]');
+      var baseMrpInput = document.querySelector('input[name="mrp"]');
+      var basePrice = parseFloat(basePriceInput ? basePriceInput.value : 0) || 450;
+      var baseMrp = parseFloat(baseMrpInput ? baseMrpInput.value : 0) || Math.round(basePrice * 1.5);
+
+      rawSizes.forEach(function(s, idx) {
+        var cached = sizePriceCache[s] || {};
+        var priceVal = cached.price !== undefined ? cached.price : (idx === 0 ? basePrice : (basePrice + (idx * 50)));
+        var mrpVal = cached.mrp !== undefined ? cached.mrp : Math.round(priceVal * 1.5);
+
+        var pNum = parseFloat(priceVal) || 0;
+        var mNum = parseFloat(mrpVal) || 0;
+        var disc = (mNum > pNum && mNum > 0) ? Math.round(((mNum - pNum) / mNum) * 100) : 0;
+
+        var safeSizeAttr = s.replace(/"/g, '&quot;');
+        var tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid #f9e2ee';
+
+        tr.innerHTML = `
+          <td style="padding:10px 12px; font-weight:700; color:#333; font-size:13px;">
+            <span style="display:inline-block; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:4px; padding:2px 8px;">${escapeHtml(s)}</span>
+          </td>
+          <td style="padding:10px 12px;">
+            <div style="position:relative; width:130px;">
+              <span style="position:absolute; left:8px; top:8px; color:#888; font-weight:600;">₹</span>
+              <input type="number" step="any" min="1" required
+                     name="size_price[${safeSizeAttr}]" 
+                     data-sizename="${safeSizeAttr}" data-field="price"
+                     value="${priceVal}" 
+                     oninput="onSizePriceInput('${escapeJs(s)}')"
+                     style="width:100%; padding:6px 8px 6px 20px; border:1px solid #d5d8de; border-radius:5px; font-size:13px; font-weight:700; color:#333; outline:none;">
+            </div>
+          </td>
+          <td style="padding:10px 12px;">
+            <div style="position:relative; width:130px;">
+              <span style="position:absolute; left:8px; top:8px; color:#888; font-weight:600;">₹</span>
+              <input type="number" step="any" min="1"
+                     name="size_mrp[${safeSizeAttr}]" 
+                     data-sizename="${safeSizeAttr}" data-field="mrp"
+                     value="${mrpVal}" 
+                     oninput="onSizePriceInput('${escapeJs(s)}')"
+                     style="width:100%; padding:6px 8px 6px 20px; border:1px solid #d5d8de; border-radius:5px; font-size:13px; color:#666; outline:none;">
+            </div>
+          </td>
+          <td style="padding:10px 12px;">
+            <span class="size-disc-badge" style="font-weight:700; color:#038d63; font-size:12.5px;">${disc}% off</span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function onSizePriceInput(sizeName) {
+      var row = event ? event.target.closest('tr') : null;
+      if (!row) return;
+
+      var pInp = row.querySelector('input[data-field="price"]');
+      var mInp = row.querySelector('input[data-field="mrp"]');
+      var discEl = row.querySelector('.size-disc-badge');
+
+      var pVal = parseFloat(pInp ? pInp.value : 0) || 0;
+      var mVal = parseFloat(mInp ? mInp.value : 0) || 0;
+
+      if (!sizePriceCache[sizeName]) sizePriceCache[sizeName] = {};
+      if (pInp) sizePriceCache[sizeName]['price'] = pInp.value;
+      if (mInp) sizePriceCache[sizeName]['mrp'] = mInp.value;
+
+      if (discEl) {
+        if (mVal > pVal && mVal > 0) {
+          var d = Math.round(((mVal - pVal) / mVal) * 100);
+          discEl.innerText = d + '% off';
+        } else {
+          discEl.innerText = '0% off';
+        }
+      }
+    }
+
+    function escapeHtml(str) {
+      return (str + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function escapeJs(str) {
+      return (str + '').replace(/'/g, "\\'").replace(/"/g, '\\"');
     }
 
     function toggleSizeChip(chipName) {
@@ -578,14 +743,16 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
 
       sizesInput.value = currentSizes.join(', ');
       renderSizeChips();
+      updateSizePricingRows();
     }
 
-    // Attach real-time input listener to update chips if user edits manually
+    // Attach real-time input listener to update chips and pricing table if user edits manually
     document.addEventListener('DOMContentLoaded', function() {
       var sizesInput = document.getElementById('sizes_input');
       if (sizesInput) {
         sizesInput.addEventListener('input', function() {
           renderSizeChips();
+          updateSizePricingRows();
         });
       }
       // Initialize on load

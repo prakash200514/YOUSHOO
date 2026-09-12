@@ -53,8 +53,21 @@ $similarProducts = $stmtSimilar->fetchAll();
 $pageTitle = $product['title'];
 require_once __DIR__ . '/includes/header.php';
 
-// Prepare sizes
+// Prepare sizes & size-specific pricing
 $sizes = array_map('trim', explode(',', $product['sizes'] ?: 'Free Size'));
+$sizePrices = !empty($product['size_prices']) ? json_decode($product['size_prices'], true) : [];
+if (!is_array($sizePrices)) $sizePrices = [];
+
+// Compute display price based on the initial active size
+$currentPrice = $product['price'];
+$currentMrp = $product['mrp'];
+$currentDiscount = $product['discount_percent'];
+$firstSize = $sizes[0] ?? '';
+if (!empty($firstSize) && !empty($sizePrices[$firstSize]['price'])) {
+    $currentPrice = (float)$sizePrices[$firstSize]['price'];
+    $currentMrp = (float)($sizePrices[$firstSize]['mrp'] ?? ($currentPrice * 1.5));
+    $currentDiscount = ($currentMrp > $currentPrice) ? round((($currentMrp - $currentPrice) / $currentMrp) * 100) : 0;
+}
 ?>
 
 <main class="main-content">
@@ -116,10 +129,15 @@ $sizes = array_map('trim', explode(',', $product['sizes'] ?: 'Free Size'));
         <div class="detail-card">
           <h1 class="detail-title"><?php echo htmlspecialchars($product['title']); ?></h1>
           
-          <div class="detail-price-box">
-            <span class="detail-price">₹<?php echo number_format($product['price'], 0); ?></span>
-            <span class="detail-mrp">₹<?php echo number_format($product['mrp'], 0); ?></span>
-            <span class="detail-discount"><?php echo $product['discount_percent']; ?>% off</span>
+          <div class="detail-price-box" style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
+            <span class="detail-price">₹<?php echo number_format($currentPrice, 0); ?></span>
+            <span class="detail-mrp">₹<?php echo number_format($currentMrp, 0); ?></span>
+            <span class="detail-discount"><?php echo $currentDiscount; ?>% off</span>
+            <?php if (!empty($sizePrices)): ?>
+              <span style="font-size:11.5px; font-weight:700; color:#9f2089; background:#fdf2f8; border:1px solid #fbcfe8; padding:3px 8px; border-radius:12px;">
+                <i class="fas fa-tags"></i> Price varies by size
+              </span>
+            <?php endif; ?>
           </div>
 
           <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
@@ -138,11 +156,28 @@ $sizes = array_map('trim', explode(',', $product['sizes'] ?: 'Free Size'));
 
         <!-- Card 2: Select Size -->
         <div class="detail-card">
-          <div class="size-selector-title">Select Size</div>
+          <div class="size-selector-title" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>Select Size</span>
+            <?php if (!empty($sizePrices)): ?>
+              <span style="font-size:11.5px; font-weight:600; color:#038d63;"><i class="fas fa-check-circle"></i> Price updates per size</span>
+            <?php endif; ?>
+          </div>
           <div class="size-chips-wrap">
-            <?php foreach ($sizes as $idx => $s): ?>
-              <div class="size-chip detail-size-chip <?php echo $idx === 0 ? 'selected' : ''; ?>" data-size="<?php echo htmlspecialchars($s); ?>">
-                <?php echo htmlspecialchars($s); ?>
+            <?php foreach ($sizes as $idx => $s): 
+              $sPrice = isset($sizePrices[$s]) ? (float)$sizePrices[$s]['price'] : (float)$product['price'];
+              $sMrp = isset($sizePrices[$s]) ? (float)$sizePrices[$s]['mrp'] : (float)$product['mrp'];
+              $sDisc = ($sMrp > $sPrice) ? round((($sMrp - $sPrice) / $sMrp) * 100) : 0;
+              $hasCustomPrice = isset($sizePrices[$s]);
+            ?>
+              <div class="size-chip detail-size-chip <?php echo $idx === 0 ? 'selected' : ''; ?>" 
+                   data-size="<?php echo htmlspecialchars($s); ?>"
+                   data-price="<?php echo $sPrice; ?>"
+                   data-mrp="<?php echo $sMrp; ?>"
+                   data-discount="<?php echo $sDisc; ?>">
+                <span><?php echo htmlspecialchars($s); ?></span>
+                <?php if ($hasCustomPrice): ?>
+                  <span class="size-price-tag" style="font-size:11px; font-weight:700; color:#038d63; margin-left:5px;">₹<?php echo number_format($sPrice, 0); ?></span>
+                <?php endif; ?>
               </div>
             <?php endforeach; ?>
           </div>

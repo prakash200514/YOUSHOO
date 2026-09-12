@@ -11,7 +11,7 @@ $userId = $_SESSION['user_id'] ?? null;
 
 // Fetch Cart Items
 if ($userId) {
-    $stmt = $pdo->prepare("SELECT c.*, p.title, p.price, p.mrp, p.stock,
+    $stmt = $pdo->prepare("SELECT c.*, p.title, p.price, p.mrp, p.stock, p.size_prices,
         (SELECT image_url FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image
         FROM cart c
         JOIN products p ON c.product_id = p.id
@@ -19,7 +19,7 @@ if ($userId) {
         ORDER BY c.created_at DESC");
     $stmt->execute([$userId, $sessionId]);
 } else {
-    $stmt = $pdo->prepare("SELECT c.*, p.title, p.price, p.mrp, p.stock,
+    $stmt = $pdo->prepare("SELECT c.*, p.title, p.price, p.mrp, p.stock, p.size_prices,
         (SELECT image_url FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image
         FROM cart c
         JOIN products p ON c.product_id = p.id
@@ -28,6 +28,18 @@ if ($userId) {
     $stmt->execute([$sessionId]);
 }
 $cartItems = $stmt->fetchAll();
+
+// Apply size-specific price if configured for this product & size
+foreach ($cartItems as &$item) {
+    if (!empty($item['size_prices'])) {
+        $spMap = json_decode($item['size_prices'], true);
+        if (is_array($spMap) && !empty($item['size']) && isset($spMap[$item['size']])) {
+            $item['price'] = (float)$spMap[$item['size']]['price'];
+            $item['mrp'] = (float)($spMap[$item['size']]['mrp'] ?? ($item['price'] * 1.5));
+        }
+    }
+}
+unset($item);
 
 // Calculate totals
 $totalMRP = 0;

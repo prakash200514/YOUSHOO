@@ -19,14 +19,14 @@ $userId = $_SESSION['user_id'] ?? null;
 
 // Fetch Cart Items
 if ($userId) {
-    $stmt = $pdo->prepare("SELECT c.*, p.title, p.price, p.mrp, p.supplier_id,
+    $stmt = $pdo->prepare("SELECT c.*, p.title, p.price, p.mrp, p.supplier_id, p.size_prices,
         (SELECT image_url FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image
         FROM cart c
         JOIN products p ON c.product_id = p.id
         WHERE c.user_id = ? OR c.session_id = ?");
     $stmt->execute([$userId, $sessionId]);
 } else {
-    $stmt = $pdo->prepare("SELECT c.*, p.title, p.price, p.mrp, p.supplier_id,
+    $stmt = $pdo->prepare("SELECT c.*, p.title, p.price, p.mrp, p.supplier_id, p.size_prices,
         (SELECT image_url FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image
         FROM cart c
         JOIN products p ON c.product_id = p.id
@@ -39,6 +39,18 @@ if (empty($cartItems) && !isset($_POST['place_order'])) {
     header("Location: /MEESHO/cart.php");
     exit;
 }
+
+// Apply size-specific price if configured for this product & size
+foreach ($cartItems as &$item) {
+    if (!empty($item['size_prices'])) {
+        $spMap = json_decode($item['size_prices'], true);
+        if (is_array($spMap) && !empty($item['size']) && isset($spMap[$item['size']])) {
+            $item['price'] = (float)$spMap[$item['size']]['price'];
+            $item['mrp'] = (float)($spMap[$item['size']]['mrp'] ?? ($item['price'] * 1.5));
+        }
+    }
+}
+unset($item);
 
 // Calculate totals
 $totalMRP = 0;

@@ -97,6 +97,7 @@ try {
             `stock` INT NOT NULL DEFAULT 50,
             `sku` VARCHAR(50) NULL,
             `sizes` VARCHAR(255) DEFAULT 'Free Size',
+            `size_prices` TEXT NULL,
             `colors` VARCHAR(255) DEFAULT 'Multi',
             `fabric` VARCHAR(100) DEFAULT 'Cotton Blend',
             `free_delivery` TINYINT(1) DEFAULT 1,

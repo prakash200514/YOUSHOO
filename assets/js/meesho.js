@@ -296,10 +296,33 @@ function initQuickViewModal() {
         const box = modalBackdrop.querySelector(".modal-dynamic-content");
         if (!box) return;
 
+        let sizePricesMap = {};
+        if (p.size_prices) {
+          try {
+            sizePricesMap = typeof p.size_prices === 'string' ? JSON.parse(p.size_prices) : p.size_prices;
+          } catch(e) {}
+        }
+
         const sizesArr = (p.sizes || "Free Size").split(",");
-        const sizeChipsHtml = sizesArr.map((s, i) => `
-          <div class="size-chip ${i === 0 ? 'selected' : ''}" onclick="selectModalSize(this, '${s.trim()}')">${s.trim()}</div>
-        `).join("");
+        const sizeChipsHtml = sizesArr.map((s, i) => {
+          const sClean = s.trim();
+          const sp = sizePricesMap && sizePricesMap[sClean];
+          const pr = sp ? sp.price : p.price;
+          const mr = sp ? sp.mrp : p.mrp;
+          const dc = (mr > pr) ? Math.round(((mr - pr) / mr) * 100) : p.discount_percent;
+          return `
+            <div class="size-chip ${i === 0 ? 'selected' : ''}" onclick="selectModalSize(this, '${sClean}', ${pr}, ${mr}, ${dc})">
+              <span>${sClean}</span>
+              ${sp ? `<span style="font-size:10.5px; font-weight:700; color:#038d63; margin-left:4px;">₹${Math.round(pr)}</span>` : ''}
+            </div>
+          `;
+        }).join("");
+
+        const firstSize = sizesArr[0].trim();
+        const firstSp = sizePricesMap && sizePricesMap[firstSize];
+        const initPrice = firstSp ? firstSp.price : p.price;
+        const initMrp = firstSp ? firstSp.mrp : p.mrp;
+        const initDisc = (initMrp > initPrice) ? Math.round(((initMrp - initPrice) / initMrp) * 100) : p.discount_percent;
 
         box.innerHTML = `
           <div style="display:grid; grid-template-columns: 280px 1fr; gap:24px; padding:24px;">
@@ -309,16 +332,16 @@ function initQuickViewModal() {
             <div>
               <span class="delivery-badge" style="margin-bottom:8px;"><i class="fas fa-truck"></i> Free Delivery</span>
               <h3 style="font-size:18px; font-weight:700; color:#333; margin-bottom:8px;">${p.title}</h3>
-              <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:12px;">
-                <span style="font-size:24px; font-weight:800; color:#333;">₹${Math.round(p.price)}</span>
-                <span style="font-size:14px; color:#888; text-decoration:line-through;">₹${Math.round(p.mrp)}</span>
-                <span style="font-size:14px; font-weight:700; color:#038d63;">${p.discount_percent}% off</span>
+              <div id="modal-price-box" style="display:flex; align-items:baseline; gap:10px; margin-bottom:12px;">
+                <span style="font-size:24px; font-weight:800; color:#333;">₹${Math.round(initPrice)}</span>
+                <span style="font-size:14px; color:#888; text-decoration:line-through;">₹${Math.round(initMrp)}</span>
+                <span style="font-size:14px; font-weight:700; color:#038d63;">${initDisc}% off</span>
               </div>
               <p style="font-size:13px; color:#666; margin-bottom:14px; line-height:1.5;">${p.description.substring(0, 160)}...</p>
               <div style="margin-bottom:18px;">
                 <div style="font-size:12px; font-weight:700; margin-bottom:6px;">Select Size:</div>
                 <div class="size-chips-wrap" id="modal-size-container">${sizeChipsHtml}</div>
-                <input type="hidden" id="modal-selected-size" value="${sizesArr[0].trim()}">
+                <input type="hidden" id="modal-selected-size" value="${firstSize}">
               </div>
               <div style="display:flex; gap:10px;">
                 <button class="btn-buy-now" style="padding:10px 16px; font-size:14px;" onclick="addToCart(${p.id}, document.getElementById('modal-selected-size').value, 'Default', 1, this)">
@@ -336,12 +359,23 @@ function initQuickViewModal() {
   };
 }
 
-window.selectModalSize = function(el, size) {
+window.selectModalSize = function(el, size, price, mrp, disc) {
   const container = document.getElementById("modal-size-container");
   if (!container) return;
   container.querySelectorAll(".size-chip").forEach(c => c.classList.remove("selected"));
   el.classList.add("selected");
   document.getElementById("modal-selected-size").value = size;
+
+  if (price !== undefined) {
+    const priceBox = document.getElementById("modal-price-box");
+    if (priceBox) {
+      priceBox.innerHTML = `
+        <span style="font-size:24px; font-weight:800; color:#333;">₹${Math.round(price)}</span>
+        <span style="font-size:14px; color:#888; text-decoration:line-through;">₹${Math.round(mrp)}</span>
+        <span style="font-size:14px; font-weight:700; color:#038d63;">${disc}% off</span>
+      `;
+    }
+  }
 };
 
 /* 8. THUMBNAIL SWITCHER ON DETAIL PAGE */
@@ -380,6 +414,21 @@ function initSizeSelector() {
       chip.classList.add("selected");
       if (hiddenInput) {
         hiddenInput.value = chip.getAttribute("data-size");
+      }
+
+      // Dynamically update product details price, MRP and discount
+      const price = chip.getAttribute("data-price");
+      const mrp = chip.getAttribute("data-mrp");
+      const disc = chip.getAttribute("data-discount");
+
+      if (price) {
+        const priceEl = document.querySelector(".detail-price");
+        const mrpEl = document.querySelector(".detail-mrp");
+        const discEl = document.querySelector(".detail-discount");
+
+        if (priceEl) priceEl.innerText = "₹" + Math.round(Number(price)).toLocaleString('en-IN');
+        if (mrpEl && mrp) mrpEl.innerText = "₹" + Math.round(Number(mrp)).toLocaleString('en-IN');
+        if (discEl && disc !== null) discEl.innerText = disc + "% off";
       }
     });
   });
