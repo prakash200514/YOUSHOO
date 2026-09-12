@@ -147,6 +147,9 @@ $logs = $stmtLogs->fetchAll();
               <span style="font-size:11px; color:#666; margin-top:4px; display:block;">
                 Select how order notifications are sent to sellers when customer places an order.
               </span>
+              <div id="notice_direct_link" style="display:none; background:#fffbeb; border:1px solid #fef3c7; border-radius:6px; padding:10px; margin-top:8px; font-size:11.5px; color:#92400e; line-height:1.4;">
+                <i class="fas fa-info-circle"></i> <strong>Note on Direct Link:</strong> Generates <code>wa.me</code> links for manual click-to-send via WhatsApp Web or mobile app. To have WhatsApp messages sent <strong>100% automatically in the background without manual clicks</strong>, select an API gateway below (such as UltraMsg, CallMeBot, or Twilio) and enter your credentials.
+              </div>
             </div>
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
@@ -332,6 +335,8 @@ Please pack and ship immediately!
         var el = document.getElementById('fields_' + p);
         if (el) el.style.display = (val === p) ? 'block' : 'none';
       });
+      var noticeEl = document.getElementById('notice_direct_link');
+      if (noticeEl) noticeEl.style.display = (val === 'direct_link') ? 'block' : 'none';
     }
     toggleProviderFields();
   </script>

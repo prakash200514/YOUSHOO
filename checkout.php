@@ -152,7 +152,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
               </span>
               <div>
                 <div style="font-size:15px; font-weight:700; color:#166534;">WhatsApp Order Notification to Seller(s)</div>
-                <div style="font-size:12px; color:#15803d;">Product sellers have been notified with order & customer shipping details.</div>
+                <div style="font-size:12px; color:#15803d;">
+                  <?php 
+                    $anySent = false;
+                    foreach ($whatsappNotifications as $wn) { if ($wn['status'] === 'sent') $anySent = true; }
+                    echo $anySent 
+                      ? "Product seller(s) have been automatically notified via WhatsApp API Gateway."
+                      : "Direct Link mode is active. Click below to send the pre-formatted order alert to the seller via WhatsApp Web / App.";
+                  ?>
+                </div>
               </div>
             </div>
 
@@ -167,24 +175,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                     <div style="font-size:12px; color:#4b5563; margin-top:2px;">
                       WhatsApp Phone: <strong>+<?php echo htmlspecialchars($wa['recipient_phone']); ?></strong>
                       <?php if ($wa['status'] === 'sent'): ?>
-                        <span style="background:#dcfce7; color:#15803d; font-size:10px; font-weight:700; padding:2px 8px; border-radius:12px; margin-left:6px;">
+                        <span style="background:#dcfce7; color:#15803d; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:12px; margin-left:6px;">
                           <i class="fas fa-check-circle"></i> Sent via Gateway
                         </span>
                       <?php else: ?>
-                        <span style="background:#fef3c7; color:#92400e; font-size:10px; font-weight:700; padding:2px 8px; border-radius:12px; margin-left:6px;">
-                          <i class="fas fa-paper-plane"></i> Ready to Deliver
+                        <span style="background:#fef3c7; color:#92400e; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:12px; margin-left:6px;">
+                          <i class="fas fa-hand-pointer"></i> Click to Send (Direct Link)
                         </span>
                       <?php endif; ?>
                     </div>
                   </div>
 
-                  <div style="display:flex; gap:8px;">
-                    <button type="button" onclick="showWhatsAppPreview(<?php echo (int)$supId; ?>)" style="background:#f3f4f6; color:#374151; border:1px solid #d1d5db; padding:7px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
-                      <i class="fas fa-eye"></i> View Message
-                    </button>
-                    <a href="<?php echo htmlspecialchars($wa['wa_url']); ?>" target="_blank" style="background:#25d366; color:#ffffff; padding:7px 14px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(37,211,102,0.3);">
-                      <i class="fab fa-whatsapp"></i> Open WhatsApp
-                    </a>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <?php if ($wa['status'] === 'sent'): ?>
+                      <span style="background:#dcfce7; color:#15803d; font-size:12px; font-weight:700; padding:6px 14px; border-radius:20px; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fas fa-check-double" style="color:#25d366;"></i> Sent Automatically to Seller
+                      </span>
+                      <button type="button" onclick="showWhatsAppPreview(<?php echo (int)$supId; ?>)" style="background:#f3f4f6; color:#374151; border:1px solid #d1d5db; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
+                        <i class="fas fa-eye"></i> View Message
+                      </button>
+                    <?php else: ?>
+                      <button type="button" onclick="showWhatsAppPreview(<?php echo (int)$supId; ?>)" style="background:#f3f4f6; color:#374151; border:1px solid #d1d5db; padding:7px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
+                        <i class="fas fa-eye"></i> View Message
+                      </button>
+                      <a href="<?php echo htmlspecialchars($wa['wa_url']); ?>" target="_blank" style="background:#25d366; color:#ffffff; padding:7px 14px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(37,211,102,0.3);">
+                        <i class="fab fa-whatsapp"></i> Send to Seller Now
+                      </a>
+                    <?php endif; ?>
                   </div>
 
                   <!-- Hidden message container for modal preview -->

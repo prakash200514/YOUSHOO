@@ -144,9 +144,10 @@ $orders = $stmt->fetchAll();
             <?php else: ?>
               <?php foreach ($orders as $ord): 
                 // Check WhatsApp log for this order
-                $stmtCheckWa = $pdo->prepare("SELECT status, recipient_phone, recipient_name FROM whatsapp_logs WHERE order_id = ? ORDER BY id DESC LIMIT 1");
+                $stmtCheckWa = $pdo->prepare("SELECT status, recipient_phone, recipient_name, message_text FROM whatsapp_logs WHERE order_id = ? ORDER BY id DESC LIMIT 1");
                 $stmtCheckWa->execute([$ord['id']]);
                 $waLog = $stmtCheckWa->fetch();
+                $waSendUrl = $waLog ? generate_whatsapp_url($waLog['recipient_phone'], $waLog['message_text']) : '';
               ?>
                 <tr>
                   <td>
@@ -179,20 +180,36 @@ $orders = $stmt->fetchAll();
                     <?php if ($waLog): ?>
                       <div>
                         <?php if ($waLog['status'] === 'sent'): ?>
-                          <span style="background:#dcfce7; color:#15803d; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:10px;">Sent</span>
+                          <span style="background:#dcfce7; color:#15803d; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:10px;">
+                            <i class="fas fa-check-circle"></i> Sent (API)
+                          </span>
+                        <?php elseif ($waLog['status'] === 'failed'): ?>
+                          <span style="background:#fee2e2; color:#dc2626; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:10px;">
+                            <i class="fas fa-times-circle"></i> API Failed
+                          </span>
                         <?php else: ?>
-                          <span style="background:#fef3c7; color:#92400e; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:10px;">Active</span>
+                          <span style="background:#fef3c7; color:#92400e; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:10px;">
+                            <i class="fas fa-link"></i> Direct Link
+                          </span>
                         <?php endif; ?>
                         <div style="font-size:11px; color:#666; margin-top:2px;">To: +<?php echo htmlspecialchars($waLog['recipient_phone']); ?></div>
                       </div>
+                      <div style="margin-top:5px; display:flex; flex-direction:column; gap:4px;">
+                        <a href="<?php echo htmlspecialchars($waSendUrl); ?>" target="_blank" style="background:#25d366; color:#fff; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                          <i class="fab fa-whatsapp"></i> Send on WhatsApp
+                        </a>
+                        <a href="/MEESHO/admin/orders.php?action=resend_wa&order_id=<?php echo $ord['id']; ?>" style="color:#0ea5e9; font-size:10.5px; font-weight:600; text-decoration:none;">
+                          <i class="fas fa-redo"></i> Re-trigger Gateway
+                        </a>
+                      </div>
                     <?php else: ?>
                       <span style="color:#888; font-size:11px;">Not Logged</span>
+                      <div style="margin-top:4px;">
+                        <a href="/MEESHO/admin/orders.php?action=resend_wa&order_id=<?php echo $ord['id']; ?>" style="color:#25d366; font-size:11px; font-weight:700; text-decoration:none;">
+                          <i class="fab fa-whatsapp"></i> Trigger Alert
+                        </a>
+                      </div>
                     <?php endif; ?>
-                    <div style="margin-top:4px;">
-                      <a href="/MEESHO/admin/orders.php?action=resend_wa&order_id=<?php echo $ord['id']; ?>" style="color:#25d366; font-size:11px; font-weight:700; text-decoration:none;">
-                        <i class="fab fa-whatsapp"></i> Re-notify Seller
-                      </a>
-                    </div>
                   </td>
                   <td>
                     <form action="/MEESHO/admin/orders.php" method="POST" style="display:flex; gap:6px;">

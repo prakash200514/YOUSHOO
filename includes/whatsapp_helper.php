@@ -161,18 +161,22 @@ function send_whatsapp_message($toPhone, $messageText, $orderId, $supplierId, $o
                 $ch = curl_init($url);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
                     'token' => $token,
                     'to'    => '+' . $cleanPhone,
                     'body'  => $messageText
                 ]));
-                curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 15);
                 $resp = curl_exec($ch);
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $curlErr = curl_error($ch);
                 curl_close($ch);
 
-                $apiResponse = $resp;
-                if ($httpCode >= 200 && $httpCode < 300) {
+                $apiResponse = $resp ?: ($curlErr ? "cURL Error: " . $curlErr : "No response from UltraMsg");
+                $decoded = json_decode($resp, true);
+                if ($httpCode >= 200 && $httpCode < 300 && (!is_array($decoded) || empty($decoded['error']))) {
                     $status = 'sent';
                     $sentSuccess = true;
                 } else {
