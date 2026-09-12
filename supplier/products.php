@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_product'])) {
         $pdo->prepare("INSERT INTO product_images (product_id, image_url, is_primary, sort_order) VALUES (?, ?, 1, 0)")
             ->execute([$newProdId, $imageUrl]);
 
-        $msg = "Product successfully listed on Meesho!";
+        $msg = "Product successfully listed on Youshoo!";
     }
 }
 
@@ -78,7 +78,7 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Products | Supplier Hub | Meesho</title>
+  <title>Manage Products | Supplier Hub | Youshoo</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/MEESHO/assets/css/meesho.css">
 </head>
@@ -88,7 +88,7 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
     <!-- Sidebar -->
     <aside class="dashboard-sidebar">
       <div class="dash-brand">
-        meesho <span>Supplier</span>
+        youshoo <span>Supplier</span>
       </div>
       <div style="padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.08);">
         <div style="font-size:14px; font-weight:700; color:#fff;"><?php echo htmlspecialchars($supplier['shop_name']); ?></div>
@@ -200,7 +200,7 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
     <div class="meesho-modal-box" style="max-width: 680px; padding: 28px;">
       <button class="modal-close-btn" onclick="document.getElementById('add-product-modal').classList.remove('open')">&times;</button>
       
-      <h2 style="font-size: 20px; font-weight: 800; color:#333; margin-bottom: 6px;">List New Product on Meesho</h2>
+      <h2 style="font-size: 20px; font-weight: 800; color:#333; margin-bottom: 6px;">List New Product on Youshoo</h2>
       <p style="font-size: 13px; color:#666; margin-bottom: 20px;">Fill in wholesale listing details. 0% Commission applies automatically.</p>
 
       <form action="/MEESHO/supplier/products.php" method="POST">

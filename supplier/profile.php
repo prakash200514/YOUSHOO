@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_profile'])) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shop Profile & Payout Settings | Meesho Supplier Hub</title>
+  <title>Shop Profile & Payout Settings | Youshoo Supplier Hub</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/MEESHO/assets/css/meesho.css">
 </head>
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_profile'])) {
     <!-- Sidebar -->
     <aside class="dashboard-sidebar">
       <div class="dash-brand">
-        meesho <span>Supplier</span>
+        youshoo <span>Supplier</span>
       </div>
       <div style="padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.08);">
         <div style="font-size:14px; font-weight:700; color:#fff;"><?php echo htmlspecialchars($supplier['shop_name']); ?></div>

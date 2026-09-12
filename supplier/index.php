@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Become a Supplier | Sell Online at 0% Commission on Meesho</title>
+  <title>Become a Supplier | Sell Online at 0% Commission on Youshoo</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/MEESHO/assets/css/meesho.css">
 </head>
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <header style="background:#ffffff; border-bottom:1px solid #e6e9ef; padding:16px 0;">
     <div class="container" style="display:flex; align-items:center; justify-content:space-between;">
       <a href="/MEESHO/index.php" class="brand-logo">
-        meesho
+        youshoo
         <span class="brand-tag" style="background:#038d63;">Supplier Hub</span>
       </a>
       <div style="display:flex; gap:16px; align-items:center;">
@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           Sell Online to 14 Crore+ Customers at <span style="color:#23bb75;">0% Commission</span>
         </h1>
         <p style="font-size:16px; opacity:0.9; margin-bottom:28px; line-height:1.5;">
-          Join 6,00,000+ suppliers who trust Meesho to grow their offline business online. Enjoy 7-day payment settlement, zero penalty charges, and nationwide delivery.
+          Join 6,00,000+ suppliers who trust Youshoo to grow their offline business online. Enjoy 7-day payment settlement, zero penalty charges, and nationwide delivery.
         </p>
         
         <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px;">
@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
           <div style="margin-bottom:16px;">
             <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Registered Email Address</label>
-            <input type="email" name="email" required value="supplier@meesho.com" style="width:100%; padding:11px 14px; border:1px solid #d5d8de; border-radius:8px; font-size:14px; outline:none;">
+            <input type="email" name="email" required value="supplier@youshoo.com" style="width:100%; padding:11px 14px; border:1px solid #d5d8de; border-radius:8px; font-size:14px; outline:none;">
           </div>
 
           <div style="margin-bottom:20px;">
@@ -186,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </button>
 
           <div style="margin-top:16px; padding:10px; background:#fdfafc; border:1px dashed #9f2089; border-radius:8px; text-align:center; font-size:12px;">
-            Demo Supplier: <strong>supplier@meesho.com</strong> / <strong>seller123</strong>
+            Demo Supplier: <strong>supplier@youshoo.com</strong> / <strong>seller123</strong>
           </div>
         </form>
 

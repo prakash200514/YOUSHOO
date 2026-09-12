@@ -183,7 +183,7 @@ window.addToCart = function(productId, size = "Free Size", color = "Default", qt
         }, 1800);
       }
 
-      showToastSuccess("Item added to your Meesho cart!");
+      showToastSuccess("Item added to your Youshoo cart!");
     } else {
       alert(data.message || "Failed to add to cart");
       if (buttonElement) {

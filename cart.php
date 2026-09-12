@@ -77,7 +77,7 @@ $totalDiscount = $totalMRP - $totalPrice;
                 <h4><a href="/MEESHO/product.php?id=<?php echo $item['product_id']; ?>"><?php echo htmlspecialchars($item['title']); ?></a></h4>
                 <div class="cart-item-meta">
                   <span>Size: <strong><?php echo htmlspecialchars($item['size']); ?></strong></span> &bull;
-                  <span>Supplier: <strong>Meesho Verified</strong></span>
+                  <span>Supplier: <strong>Youshoo Verified</strong></span>
                 </div>
 
                 <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:12px;">

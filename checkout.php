@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     if (empty($name) || empty($phone) || empty($address) || empty($city) || empty($pincode)) {
         $error = "Please fill in all required shipping address fields.";
     } else {
-        $orderNumber = "MEESH-" . strtoupper(bin2hex(random_bytes(4)));
+        $orderNumber = "YOUSH-" . strtoupper(bin2hex(random_bytes(4)));
 
         $stmtOrder = $pdo->prepare("INSERT INTO orders 
             (order_number, user_id, total_amount, discount_amount, delivery_fee, final_amount, payment_method, payment_status, order_status, shipping_name, shipping_phone, shipping_address, shipping_city, shipping_state, shipping_pincode)
@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
         <h1 style="font-size:26px; font-weight:800; color:#333; margin-bottom:8px;">Order Placed Successfully!</h1>
         <p style="font-size:15px; color:#666; margin-bottom:18px;">
-          Thank you for shopping with Meesho. We're packing your order with love.
+          Thank you for shopping with Youshoo. We're packing your order with love.
         </p>
 
         <div style="background:#fdfafc; border:1.5px dashed #9f2089; border-radius:10px; padding:16px; display:inline-block; margin-bottom:24px;">
@@ -267,7 +267,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             </button>
 
             <div style="font-size:11px; color:#888; text-align:center; margin-top:14px;">
-              By clicking "Place Order Now", you agree to Meesho's Terms of Service and Privacy Policy.
+              By clicking "Place Order Now", you agree to Youshoo's Terms of Service and Privacy Policy.
             </div>
           </aside>
         </div>

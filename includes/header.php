@@ -17,7 +17,7 @@ $allCategories = $stmtCat->fetchAll();
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?php echo isset($pageTitle) ? htmlspecialchars($pageTitle) . ' | Meesho' : 'Meesho: Online Shopping for Sarees, Kurtis, Fashion, Electronics & More'; ?></title>
+  <title><?php echo isset($pageTitle) ? htmlspecialchars($pageTitle) . ' | Youshoo' : 'Youshoo: Online Shopping for Sarees, Kurtis, Fashion, Electronics & More'; ?></title>
   
   <!-- FontAwesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -41,7 +41,7 @@ $allCategories = $stmtCat->fetchAll();
       <div class="nav-main">
         <!-- Logo -->
         <a href="/MEESHO/index.php" class="brand-logo">
-          meesho
+          youshoo
           <span class="brand-tag">Market</span>
         </a>
 
@@ -83,7 +83,7 @@ $allCategories = $stmtCat->fetchAll();
                   <h4>Hello, <?php echo htmlspecialchars($currentUser['name']); ?>!</h4>
                   <p><?php echo htmlspecialchars($currentUser['email']); ?> (<?php echo ucfirst($currentUser['role']); ?>)</p>
                 <?php else: ?>
-                  <h4>Welcome to Meesho</h4>
+                  <h4>Welcome to Youshoo</h4>
                   <p>To access your orders and wishlist</p>
                   <a href="/MEESHO/auth.php" class="btn-login-purple">Sign In / Register</a>
                 <?php endif; ?>
@@ -148,7 +148,7 @@ $allCategories = $stmtCat->fetchAll();
                 <div class="mega-column">
                   <h5>Customer Favorites</h5>
                   <ul>
-                    <li><a href="/MEESHO/index.php?category=<?php echo urlencode($cat['slug']); ?>">Meesho Choice</a></li>
+                    <li><a href="/MEESHO/index.php?category=<?php echo urlencode($cat['slug']); ?>">Youshoo Choice</a></li>
                     <li><a href="/MEESHO/index.php?category=<?php echo urlencode($cat['slug']); ?>">Lowest Prices Guaranteed</a></li>
                     <li><a href="/MEESHO/index.php?category=<?php echo urlencode($cat['slug']); ?>">Customer Photos & Reviews</a></li>
                   </ul>

@@ -47,7 +47,7 @@ $suppliers = $stmt->fetchAll();
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Supplier Management | Meesho Admin Suite</title>
+  <title>Supplier Management | Youshoo Admin Suite</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/MEESHO/assets/css/meesho.css">
 </head>
@@ -56,7 +56,7 @@ $suppliers = $stmt->fetchAll();
   <div class="dashboard-container">
     <aside class="dashboard-sidebar">
       <div class="dash-brand">
-        meesho <span style="color:#f43397;">Admin</span>
+        youshoo <span style="color:#f43397;">Admin</span>
       </div>
       <ul class="dash-nav">
         <li class="dash-nav-item"><a href="/MEESHO/admin/index.php"><i class="fas fa-chart-line"></i> Dashboard</a></li>

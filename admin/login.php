@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meesho Admin Console - Secure Control Center</title>
+  <title>Youshoo Admin Console - Secure Control Center</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/MEESHO/assets/css/meesho.css">
   <style>
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="admin-login-box">
     <div style="text-align:center; margin-bottom: 28px;">
       <div class="brand-logo" style="justify-content:center; color:#fff; font-size:32px; margin-bottom:8px;">
-        meesho
+        youshoo
         <span class="brand-tag" style="background:#f43397;">Admin Suite</span>
       </div>
       <p style="font-size:13px; color:#a0a5b9;">Global Platform Management & Analytics</p>
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form action="/MEESHO/admin/login.php" method="POST">
       <div style="margin-bottom:18px;">
         <label style="display:block; font-size:12.5px; font-weight:600; color:#c2c5d1; margin-bottom:6px;">Administrator Email</label>
-        <input type="email" name="email" required value="admin@meesho.com" class="admin-input">
+        <input type="email" name="email" required value="admin@youshoo.com" class="admin-input">
       </div>
 
       <div style="margin-bottom:24px;">
@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </button>
 
       <div style="margin-top:20px; padding:12px; background:rgba(255,255,255,0.05); border:1px dashed rgba(255,255,255,0.2); border-radius:8px; text-align:center; font-size:12px; color:#a0a5b9;">
-        Default Credentials: <strong>admin@meesho.com</strong> / <strong>admin123</strong>
+        Default Credentials: <strong>admin@youshoo.com</strong> / <strong>admin123</strong>
       </div>
 
       <div style="text-align:center; margin-top:20px;">

@@ -101,7 +101,7 @@ require_once __DIR__ . '/includes/header.php';
       <!-- Top Logo / Title -->
       <div style="text-align:center; margin-bottom:24px;">
         <div class="brand-logo" style="justify-content:center; margin-bottom:6px;">
-          meesho
+          youshoo
           <span class="brand-tag">User</span>
         </div>
         <p style="font-size:13px; color:#666;">Sign up or log in to view orders & track delivery</p>
@@ -129,7 +129,7 @@ require_once __DIR__ . '/includes/header.php';
 
         <div style="margin-bottom:16px;">
           <label style="display:block; font-size:13px; font-weight:600; color:#444; margin-bottom:6px;">Email Address</label>
-          <input type="email" name="email" required value="customer@meesho.com" style="width:100%; padding:11px 14px; border:1.5px solid #d5d8de; border-radius:8px; font-size:14px; outline:none;">
+          <input type="email" name="email" required value="customer@youshoo.com" style="width:100%; padding:11px 14px; border:1.5px solid #d5d8de; border-radius:8px; font-size:14px; outline:none;">
         </div>
 
         <div style="margin-bottom:20px;">
@@ -138,13 +138,13 @@ require_once __DIR__ . '/includes/header.php';
         </div>
 
         <button type="submit" class="btn-buy-now" style="width:100%; padding:12px; font-size:15px;">
-          Sign In to Meesho
+          Sign In to Youshoo
         </button>
 
         <!-- One-Click Demo Login -->
         <div style="margin-top:20px; padding:12px; background:#fdfafc; border:1px dashed #9f2089; border-radius:8px; text-align:center;">
           <div style="font-size:12px; font-weight:700; color:#9f2089; margin-bottom:4px;">Quick Demo Account:</div>
-          <div style="font-size:11.5px; color:#555;">Email: <strong>customer@meesho.com</strong> | Pass: <strong>user123</strong></div>
+          <div style="font-size:11.5px; color:#555;">Email: <strong>customer@youshoo.com</strong> | Pass: <strong>user123</strong></div>
         </div>
       </form>
 
@@ -179,7 +179,7 @@ require_once __DIR__ . '/includes/header.php';
 
       <!-- Seller registration link -->
       <div style="text-align:center; margin-top:24px; border-top:1px solid #f1f1f1; padding-top:16px; font-size:13px; color:#666;">
-        Want to sell products on Meesho? <a href="/MEESHO/supplier/index.php" style="color:#9f2089; font-weight:700;">Join as a Supplier &rarr;</a>
+        Want to sell products on Youshoo? <a href="/MEESHO/supplier/index.php" style="color:#9f2089; font-weight:700;">Join as a Supplier &rarr;</a>
       </div>
 
     </div>

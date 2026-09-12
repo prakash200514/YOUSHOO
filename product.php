@@ -184,7 +184,7 @@ $sizes = array_map('trim', explode(',', $product['sizes'] ?: 'Free Size'));
             </tr>
             <tr>
               <td>SKU Code</td>
-              <td><?php echo htmlspecialchars($product['sku'] ?: 'MEESH-' . $product['id']); ?></td>
+              <td><?php echo htmlspecialchars($product['sku'] ?: 'YOUSH-' . $product['id']); ?></td>
             </tr>
             <tr>
               <td>Country of Origin</td>

@@ -62,7 +62,7 @@ $recentOrders = $stmtRecentOrders->fetchAll();
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Executive Control Center | Meesho Admin Suite</title>
+  <title>Executive Control Center | Youshoo Admin Suite</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/MEESHO/assets/css/meesho.css">
 </head>
@@ -72,7 +72,7 @@ $recentOrders = $stmtRecentOrders->fetchAll();
     <!-- Sidebar -->
     <aside class="dashboard-sidebar">
       <div class="dash-brand">
-        meesho <span style="color:#f43397;">Admin</span>
+        youshoo <span style="color:#f43397;">Admin</span>
       </div>
 
       <div style="padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.08);">
@@ -96,7 +96,7 @@ $recentOrders = $stmtRecentOrders->fetchAll();
     <main class="dashboard-main">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px;">
         <div>
-          <h1 style="font-size:26px; font-weight:800; color:#222;">Meesho Marketplace Overview</h1>
+          <h1 style="font-size:26px; font-weight:800; color:#222;">Youshoo Marketplace Overview</h1>
           <p style="font-size:13px; color:#666;">Real-time ecosystem metrics, transaction analytics and catalog control</p>
         </div>
         <div>
