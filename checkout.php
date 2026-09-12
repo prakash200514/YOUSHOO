@@ -2,6 +2,13 @@
 /**
  * Meesho Checkout & Order Placement
  */
+require_once __DIR__ . '/includes/auth_helper.php';
+
+if (!is_logged_in()) {
+    header("Location: /MEESHO/auth.php?redirect=checkout&msg=checkout_required");
+    exit;
+}
+
 $pageTitle = "Checkout";
 require_once __DIR__ . '/includes/header.php';
 

@@ -59,9 +59,8 @@
             <i class="fas fa-phone-alt" style="color:#9f2089; margin-right:6px;"></i> 1800-120-1234 (Toll Free)
           </p>
           <div style="background:#fdfafc; border:1px solid #f9d5ef; padding:12px; border-radius:8px;">
-            <div style="font-size:12px; font-weight:700; color:#56034c; margin-bottom:4px;">Demo Accounts:</div>
+            <div style="font-size:12px; font-weight:700; color:#56034c; margin-bottom:4px;">Seller Demo Access:</div>
             <div style="font-size:11.5px; color:#555;"><strong>Supplier:</strong> supplier@youshoo.com / seller123</div>
-            <div style="font-size:11.5px; color:#555;"><strong>Customer:</strong> customer@youshoo.com / user123</div>
           </div>
         </div>
       </div>

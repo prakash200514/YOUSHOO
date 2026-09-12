@@ -8,9 +8,31 @@ require_once __DIR__ . '/includes/auth_helper.php';
 $pdo = getDBConnection();
 $error = '';
 $success = '';
+$info = '';
+
+$redirect = $_GET['redirect'] ?? $_POST['redirect'] ?? '';
+$activeTab = $_GET['tab'] ?? 'login';
+
+if (isset($_GET['registered'])) {
+    $success = "Account registered successfully! Please sign in with your email and password.";
+    $activeTab = 'login';
+}
+
+$msg = $_GET['msg'] ?? '';
+if ($msg === 'checkout_required') {
+    $info = "Please sign in or create an account to proceed to checkout.";
+} elseif ($msg === 'orders_required') {
+    $info = "Please sign in or create an account to view your orders.";
+}
 
 // If already logged in
 if (is_logged_in()) {
+    if (!empty($redirect)) {
+        if ($redirect === 'checkout') header("Location: /MEESHO/checkout.php");
+        elseif ($redirect === 'orders') header("Location: /MEESHO/orders.php");
+        else header("Location: " . $redirect);
+        exit;
+    }
     if (is_admin()) header("Location: /MEESHO/admin/index.php");
     elseif (is_supplier()) header("Location: /MEESHO/supplier/dashboard.php");
     else header("Location: /MEESHO/index.php");
@@ -47,6 +69,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $pdo->prepare("UPDATE cart SET user_id = ? WHERE session_id = ? AND user_id IS NULL")
                         ->execute([$user['id'], $sessionId]);
 
+                    if (!empty($redirect)) {
+                        if ($redirect === 'checkout') header("Location: /MEESHO/checkout.php");
+                        elseif ($redirect === 'orders') header("Location: /MEESHO/orders.php");
+                        else header("Location: " . $redirect);
+                        exit;
+                    }
+
                     if ($user['role'] === 'admin') header("Location: /MEESHO/admin/index.php");
                     elseif ($user['role'] === 'supplier') header("Location: /MEESHO/supplier/dashboard.php");
                     else header("Location: /MEESHO/index.php");
@@ -64,30 +93,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($fullName) || empty($email) || empty($password)) {
             $error = "Please provide name, email, and password.";
+            $activeTab = 'register';
         } else {
             // Check if email already registered
             $stmtCheck = $pdo->prepare("SELECT id FROM users WHERE email = ?");
             $stmtCheck->execute([$email]);
             if ($stmtCheck->fetch()) {
                 $error = "Email address already registered. Please log in.";
+                $activeTab = 'register';
             } else {
                 $hashed = password_hash($password, PASSWORD_DEFAULT);
                 $stmtIns = $pdo->prepare("INSERT INTO users (full_name, email, phone, password_hash, role, status) VALUES (?, ?, ?, ?, 'customer', 'active')");
                 $stmtIns->execute([$fullName, $email, $phone, $hashed]);
-                
-                $newUserId = $pdo->lastInsertId();
-                $_SESSION['user_id'] = $newUserId;
-                $_SESSION['user_name'] = $fullName;
-                $_SESSION['user_email'] = $email;
-                $_SESSION['user_role'] = 'customer';
-                $_SESSION['user_phone'] = $phone;
 
-                header("Location: /MEESHO/index.php");
+                // Customer must register their account and then log in (no auto-login)
+                $redirectQuery = !empty($redirect) ? '&redirect=' . urlencode($redirect) : '';
+                header("Location: /MEESHO/auth.php?registered=1&email=" . urlencode($email) . $redirectQuery);
                 exit;
             }
         }
     }
 }
+
+$loginEmailVal = htmlspecialchars($_GET['email'] ?? ($_POST['email'] ?? ''));
 
 $pageTitle = "Sign In or Register";
 require_once __DIR__ . '/includes/header.php';
@@ -107,50 +135,62 @@ require_once __DIR__ . '/includes/header.php';
         <p style="font-size:13px; color:#666;">Sign up or log in to view orders & track delivery</p>
       </div>
 
+      <?php if (!empty($success)): ?>
+        <div style="background:#e6f7f2; color:#038d63; padding:12px 14px; border-radius:8px; margin-bottom:18px; font-size:13px; font-weight:600; border:1px solid #a7f3d0;">
+          <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($success); ?>
+        </div>
+      <?php endif; ?>
+
+      <?php if (!empty($info)): ?>
+        <div style="background:#eff6ff; color:#1d4ed8; padding:12px 14px; border-radius:8px; margin-bottom:18px; font-size:13px; font-weight:600; border:1px solid #bfdbfe;">
+          <i class="fas fa-info-circle"></i> <?php echo htmlspecialchars($info); ?>
+        </div>
+      <?php endif; ?>
+
       <?php if (!empty($error)): ?>
-        <div style="background:#fee2e2; color:#dc2626; padding:10px 14px; border-radius:8px; margin-bottom:18px; font-size:13px; font-weight:600;">
+        <div style="background:#fee2e2; color:#dc2626; padding:10px 14px; border-radius:8px; margin-bottom:18px; font-size:13px; font-weight:600; border:1px solid #fecaca;">
           <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?>
         </div>
       <?php endif; ?>
 
       <!-- Tabs (Login vs Register) -->
       <div style="display:flex; border-bottom:2px solid #f1f1f1; margin-bottom:24px;">
-        <button type="button" id="tab-login-btn" onclick="switchAuthTab('login')" style="flex:1; padding:10px; background:none; border:none; font-size:15px; font-weight:700; color:#9f2089; border-bottom:2px solid #9f2089; cursor:pointer;">
+        <button type="button" id="tab-login-btn" onclick="switchAuthTab('login')" style="flex:1; padding:10px; background:none; border:none; font-size:15px; font-weight:700; color:<?php echo $activeTab === 'register' ? '#888' : '#9f2089'; ?>; border-bottom:2px solid <?php echo $activeTab === 'register' ? 'transparent' : '#9f2089'; ?>; cursor:pointer;">
           Sign In
         </button>
-        <button type="button" id="tab-register-btn" onclick="switchAuthTab('register')" style="flex:1; padding:10px; background:none; border:none; font-size:15px; font-weight:600; color:#888; border-bottom:2px solid transparent; cursor:pointer;">
+        <button type="button" id="tab-register-btn" onclick="switchAuthTab('register')" style="flex:1; padding:10px; background:none; border:none; font-size:15px; font-weight:600; color:<?php echo $activeTab === 'register' ? '#9f2089' : '#888'; ?>; border-bottom:2px solid <?php echo $activeTab === 'register' ? '#9f2089' : 'transparent'; ?>; cursor:pointer;">
           Create Account
         </button>
       </div>
 
       <!-- Login Form -->
-      <form action="/MEESHO/auth.php" method="POST" id="login-form">
+      <form action="/MEESHO/auth.php" method="POST" id="login-form" style="<?php echo $activeTab === 'register' ? 'display:none;' : ''; ?>">
         <input type="hidden" name="action" value="login">
+        <?php if (!empty($redirect)): ?>
+          <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($redirect); ?>">
+        <?php endif; ?>
 
         <div style="margin-bottom:16px;">
           <label style="display:block; font-size:13px; font-weight:600; color:#444; margin-bottom:6px;">Email Address</label>
-          <input type="email" name="email" required value="customer@youshoo.com" style="width:100%; padding:11px 14px; border:1.5px solid #d5d8de; border-radius:8px; font-size:14px; outline:none;">
+          <input type="email" name="email" required placeholder="Enter your email address" value="<?php echo $loginEmailVal; ?>" style="width:100%; padding:11px 14px; border:1.5px solid #d5d8de; border-radius:8px; font-size:14px; outline:none;">
         </div>
 
         <div style="margin-bottom:20px;">
           <label style="display:block; font-size:13px; font-weight:600; color:#444; margin-bottom:6px;">Password</label>
-          <input type="password" name="password" required value="user123" style="width:100%; padding:11px 14px; border:1.5px solid #d5d8de; border-radius:8px; font-size:14px; outline:none;">
+          <input type="password" name="password" required placeholder="Enter your password" style="width:100%; padding:11px 14px; border:1.5px solid #d5d8de; border-radius:8px; font-size:14px; outline:none;">
         </div>
 
         <button type="submit" class="btn-buy-now" style="width:100%; padding:12px; font-size:15px;">
           Sign In to Youshoo
         </button>
-
-        <!-- One-Click Demo Login -->
-        <div style="margin-top:20px; padding:12px; background:#fdfafc; border:1px dashed #9f2089; border-radius:8px; text-align:center;">
-          <div style="font-size:12px; font-weight:700; color:#9f2089; margin-bottom:4px;">Quick Demo Account:</div>
-          <div style="font-size:11.5px; color:#555;">Email: <strong>customer@youshoo.com</strong> | Pass: <strong>user123</strong></div>
-        </div>
       </form>
 
       <!-- Register Form -->
-      <form action="/MEESHO/auth.php" method="POST" id="register-form" style="display:none;">
+      <form action="/MEESHO/auth.php" method="POST" id="register-form" style="<?php echo $activeTab === 'register' ? '' : 'display:none;'; ?>">
         <input type="hidden" name="action" value="register">
+        <?php if (!empty($redirect)): ?>
+          <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($redirect); ?>">
+        <?php endif; ?>
 
         <div style="margin-bottom:14px;">
           <label style="display:block; font-size:13px; font-weight:600; color:#444; margin-bottom:6px;">Full Name *</label>
