@@ -4,6 +4,7 @@
  */
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/auth_helper.php';
+require_once __DIR__ . '/../includes/whatsapp_helper.php';
 
 require_supplier();
 
@@ -126,18 +127,48 @@ $orders = $stmt->fetchAll();
               <th>Amount</th>
               <th>Status</th>
               <th>Update Status</th>
+              <th>WhatsApp</th>
               <th>Slip</th>
             </tr>
           </thead>
           <tbody>
             <?php if (empty($orders)): ?>
               <tr>
-                <td colspan="7" style="text-align:center; padding:40px; color:#888;">
+                <td colspan="8" style="text-align:center; padding:40px; color:#888;">
                   No orders found in this status category.
                 </td>
               </tr>
             <?php else: ?>
-              <?php foreach ($orders as $ord): ?>
+              <?php foreach ($orders as $ord): 
+                // Build seller notification message for this item
+                $fakeOrder = [
+                    'id' => $ord['order_id'],
+                    'order_number' => $ord['order_number'],
+                    'created_at' => $ord['order_date'],
+                    'payment_method' => $ord['payment_method'],
+                    'payment_status' => ($ord['payment_method'] === 'cod' ? 'pending' : 'paid'),
+                    'shipping_name' => $ord['shipping_name'],
+                    'shipping_phone' => $ord['shipping_phone'],
+                    'shipping_address' => $ord['shipping_address'],
+                    'shipping_city' => $ord['shipping_city'],
+                    'shipping_state' => $ord['shipping_state'],
+                    'shipping_pincode' => $ord['shipping_pincode']
+                ];
+                $fakeItems = [[
+                    'product_title' => $ord['product_title'],
+                    'quantity' => $ord['quantity'],
+                    'size' => $ord['size'],
+                    'color' => $ord['color'],
+                    'total_price' => $ord['total_price'],
+                    'unit_price' => $ord['unit_price']
+                ]];
+                $sellerWaMsg = build_seller_whatsapp_message($supplier, $fakeOrder, $fakeItems);
+                $sellerWaUrl = generate_whatsapp_url($supplier['phone'], $sellerWaMsg);
+
+                // Build direct message to customer
+                $custMsg = "Hello " . $ord['shipping_name'] . ", greetings from " . $supplier['shop_name'] . " on Youshoo!\nWe have received your order #" . $ord['order_number'] . " for " . $ord['product_title'] . " (Qty: " . $ord['quantity'] . "). We are preparing your package for dispatch. Thank you!";
+                $custWaUrl = generate_whatsapp_url($ord['shipping_phone'], $custMsg);
+              ?>
                 <tr>
                   <td>
                     <strong><?php echo htmlspecialchars($ord['order_number']); ?></strong>
@@ -180,6 +211,16 @@ $orders = $stmt->fetchAll();
                         Save
                       </button>
                     </form>
+                  </td>
+                  <td>
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                      <a href="<?php echo htmlspecialchars($sellerWaUrl); ?>" target="_blank" style="background:#25d366; color:#fff; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="View WhatsApp Order Details sent to you">
+                        <i class="fab fa-whatsapp"></i> Order Alert
+                      </a>
+                      <a href="<?php echo htmlspecialchars($custWaUrl); ?>" target="_blank" style="background:#0ea5e9; color:#fff; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="Chat directly with customer on WhatsApp">
+                        <i class="fab fa-whatsapp"></i> Chat Cust.
+                      </a>
+                    </div>
                   </td>
                   <td>
                     <button onclick="window.print()" style="background:none; border:1px solid #d5d8de; padding:4px 8px; border-radius:4px; font-size:11px; color:#555; cursor:pointer;">

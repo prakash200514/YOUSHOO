@@ -89,8 +89,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_profile'])) {
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:14px;">
               <div>
-                <label style="display:block; font-size:12.5px; font-weight:700; color:#333; margin-bottom:4px;">Contact Phone *</label>
-                <input type="tel" name="phone" required value="<?php echo htmlspecialchars($supplier['phone']); ?>" style="width:100%; padding:10px 12px; border:1px solid #d5d8de; border-radius:6px; font-size:14px; outline:none;">
+                <label style="display:block; font-size:12.5px; font-weight:700; color:#15803d; margin-bottom:4px;">
+                  <i class="fab fa-whatsapp" style="color:#25d366; margin-right:4px;"></i> WhatsApp / Contact Phone *
+                </label>
+                <input type="tel" name="phone" required placeholder="e.g. 9820044556" value="<?php echo htmlspecialchars($supplier['phone']); ?>" style="width:100%; padding:10px 12px; border:1.5px solid #86efac; border-radius:6px; font-size:14px; outline:none;">
+                <span style="display:block; font-size:11px; color:#666; margin-top:3px;">
+                  <i class="fas fa-info-circle"></i> Customer order placed alerts & shipping details are sent here.
+                </span>
               </div>
               <div>
                 <label style="display:block; font-size:12.5px; font-weight:700; color:#333; margin-bottom:4px;">GSTIN</label>

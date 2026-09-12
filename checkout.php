@@ -3,6 +3,7 @@
  * Meesho Checkout & Order Placement
  */
 require_once __DIR__ . '/includes/auth_helper.php';
+require_once __DIR__ . '/includes/whatsapp_helper.php';
 
 if (!is_logged_in()) {
     header("Location: /MEESHO/auth.php?redirect=checkout&msg=checkout_required");
@@ -51,6 +52,7 @@ $totalDiscount = $totalMRP - $totalPrice;
 // Handle Order Placement
 $orderSuccess = null;
 $newOrderNumber = null;
+$whatsappNotifications = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     $name = trim($_POST['shipping_name'] ?? '');
@@ -98,6 +100,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             $pdo->prepare("DELETE FROM cart WHERE session_id = ?")->execute([$sessionId]);
         }
 
+        // Send WhatsApp notifications to the seller(s) of the ordered products
+        $whatsappNotifications = notify_sellers_for_order($orderId);
+
         $orderSuccess = true;
         $newOrderNumber = $orderNumber;
     }
@@ -109,22 +114,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
     <?php if ($orderSuccess): ?>
       <!-- CONFETTI CELEBRATION SCREEN -->
-      <div style="background:#ffffff; border-radius:16px; border:1px solid #e6e9ef; padding:60px 30px; text-align:center; max-width:680px; margin:40px auto 80px; box-shadow:0 10px 40px rgba(0,0,0,0.08); position:relative; overflow:hidden;">
+      <div style="background:#ffffff; border-radius:16px; border:1px solid #e6e9ef; padding:50px 30px; text-align:center; max-width:720px; margin:40px auto 80px; box-shadow:0 10px 40px rgba(0,0,0,0.08); position:relative; overflow:hidden;">
         
         <!-- Animated Checkmark Icon -->
-        <div style="width:84px; height:84px; border-radius:50%; background:#e6f7f2; color:#038d63; display:flex; align-items:center; justify-content:center; font-size:42px; margin:0 auto 20px; animation:bounceCart 0.8s ease;">
+        <div style="width:80px; height:80px; border-radius:50%; background:#e6f7f2; color:#038d63; display:flex; align-items:center; justify-content:center; font-size:40px; margin:0 auto 16px; animation:bounceCart 0.8s ease;">
           <i class="fas fa-check"></i>
         </div>
 
-        <h1 style="font-size:26px; font-weight:800; color:#333; margin-bottom:8px;">Order Placed Successfully!</h1>
-        <p style="font-size:15px; color:#666; margin-bottom:18px;">
+        <h1 style="font-size:26px; font-weight:800; color:#222; margin-bottom:6px;">Order Placed Successfully!</h1>
+        <p style="font-size:14.5px; color:#666; margin-bottom:18px;">
           Thank you for shopping with Youshoo. We're packing your order with love.
         </p>
 
-        <div style="background:#fdfafc; border:1.5px dashed #9f2089; border-radius:10px; padding:16px; display:inline-block; margin-bottom:24px;">
-          <div style="font-size:12px; font-weight:700; color:#9f2089; text-transform:uppercase; letter-spacing:1px;">Order Reference ID</div>
-          <div style="font-size:22px; font-weight:800; color:#333; margin-top:4px; font-family:Consolas, monospace;"><?php echo htmlspecialchars($newOrderNumber); ?></div>
+        <div style="background:#fdfafc; border:1.5px dashed #9f2089; border-radius:10px; padding:14px 24px; display:inline-block; margin-bottom:24px;">
+          <div style="font-size:11px; font-weight:700; color:#9f2089; text-transform:uppercase; letter-spacing:1px;">Order Reference ID</div>
+          <div style="font-size:22px; font-weight:800; color:#333; margin-top:2px; font-family:Consolas, monospace;"><?php echo htmlspecialchars($newOrderNumber); ?></div>
         </div>
+
+        <!-- WhatsApp Notification to Sellers Card -->
+        <?php if (!empty($whatsappNotifications)): ?>
+          <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:12px; padding:20px; margin-bottom:28px; text-align:left;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+              <span style="background:#25d366; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px;">
+                <i class="fab fa-whatsapp"></i>
+              </span>
+              <div>
+                <div style="font-size:15px; font-weight:700; color:#166534;">WhatsApp Order Notification to Seller(s)</div>
+                <div style="font-size:12px; color:#15803d;">Product sellers have been notified with order & customer shipping details.</div>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <?php foreach ($whatsappNotifications as $supId => $wa): ?>
+                <div style="background:#ffffff; border:1px solid #dcfce7; border-radius:8px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                  <div>
+                    <div style="font-size:13.5px; font-weight:700; color:#1f2937;">
+                      <i class="fas fa-store" style="color:#9f2089; margin-right:4px;"></i>
+                      <?php echo htmlspecialchars($wa['recipient_name']); ?>
+                    </div>
+                    <div style="font-size:12px; color:#4b5563; margin-top:2px;">
+                      WhatsApp Phone: <strong>+<?php echo htmlspecialchars($wa['recipient_phone']); ?></strong>
+                      <?php if ($wa['status'] === 'sent'): ?>
+                        <span style="background:#dcfce7; color:#15803d; font-size:10px; font-weight:700; padding:2px 8px; border-radius:12px; margin-left:6px;">
+                          <i class="fas fa-check-circle"></i> Sent via Gateway
+                        </span>
+                      <?php else: ?>
+                        <span style="background:#fef3c7; color:#92400e; font-size:10px; font-weight:700; padding:2px 8px; border-radius:12px; margin-left:6px;">
+                          <i class="fas fa-paper-plane"></i> Ready to Deliver
+                        </span>
+                      <?php endif; ?>
+                    </div>
+                  </div>
+
+                  <div style="display:flex; gap:8px;">
+                    <button type="button" onclick="showWhatsAppPreview(<?php echo (int)$supId; ?>)" style="background:#f3f4f6; color:#374151; border:1px solid #d1d5db; padding:7px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
+                      <i class="fas fa-eye"></i> View Message
+                    </button>
+                    <a href="<?php echo htmlspecialchars($wa['wa_url']); ?>" target="_blank" style="background:#25d366; color:#ffffff; padding:7px 14px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(37,211,102,0.3);">
+                      <i class="fab fa-whatsapp"></i> Open WhatsApp
+                    </a>
+                  </div>
+
+                  <!-- Hidden message container for modal preview -->
+                  <div id="wa-text-<?php echo (int)$supId; ?>" style="display:none;"><?php echo htmlspecialchars($wa['message']); ?></div>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          </div>
+        <?php endif; ?>
 
         <div style="display:flex; justify-content:center; gap:16px; margin-top:10px;">
           <a href="/MEESHO/orders.php" class="btn-buy-now" style="padding:12px 28px;">
@@ -135,6 +192,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
           </a>
         </div>
       </div>
+
+      <!-- WhatsApp Preview Modal -->
+      <div id="waModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:14px; max-width:550px; width:92%; max-height:85vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+          <div style="background:#075e54; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-weight:700; font-size:15px; display:flex; align-items:center; gap:8px;">
+              <i class="fab fa-whatsapp" style="font-size:20px; color:#25d366;"></i> WhatsApp Seller Notification Message
+            </div>
+            <button onclick="closeWhatsAppPreview()" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">&times;</button>
+          </div>
+          <div style="padding:20px; overflow-y:auto; flex:1; background:#efeae2; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+            <div style="background:#fff; border-radius:8px; padding:14px 18px; font-size:13px; line-height:1.6; color:#111; box-shadow:0 1px 2px rgba(0,0,0,0.15); white-space:pre-wrap;" id="modalWaContent"></div>
+          </div>
+          <div style="padding:14px 20px; background:#f9fafb; border-top:1px solid #e5e7eb; text-align:right;">
+            <button onclick="closeWhatsAppPreview()" style="background:#6b7280; color:#fff; border:none; padding:8px 16px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        function showWhatsAppPreview(supId) {
+          var textEl = document.getElementById('wa-text-' + supId);
+          if (textEl) {
+            document.getElementById('modalWaContent').innerText = textEl.innerText;
+            var modal = document.getElementById('waModal');
+            modal.style.display = 'flex';
+          }
+        }
+        function closeWhatsAppPreview() {
+          document.getElementById('waModal').style.display = 'none';
+        }
+      </script>
     <?php else: ?>
       <!-- CHECKOUT FORM -->
       <div style="padding: 24px 0 16px;">

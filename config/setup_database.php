@@ -11,7 +11,7 @@ $host = '127.0.0.1';
 $port = '3306';
 $user = 'root';
 $pass = 'password';
-$dbname = 'meesho_db';
+$dbname = 'youshoo_db';
 
 echo "<pre style='font-family: Consolas, monospace; background: #1a1a2e; color: #e94560; padding: 20px; border-radius: 8px;'>";
 echo "====================================================\n";
@@ -195,6 +195,27 @@ try {
             `active` TINYINT(1) DEFAULT 1,
             `sort_order` INT DEFAULT 0,
             `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+
+        "whatsapp_logs" => "CREATE TABLE IF NOT EXISTS `whatsapp_logs` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `order_id` INT NOT NULL,
+            `supplier_id` INT NOT NULL,
+            `order_number` VARCHAR(50) NOT NULL,
+            `recipient_phone` VARCHAR(25) NOT NULL,
+            `recipient_name` VARCHAR(100) NOT NULL,
+            `message_text` TEXT NOT NULL,
+            `status` ENUM('sent', 'queued', 'failed', 'direct_link') DEFAULT 'direct_link',
+            `api_response` TEXT NULL,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX (`order_id`),
+            INDEX (`supplier_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+
+        "whatsapp_settings" => "CREATE TABLE IF NOT EXISTS `whatsapp_settings` (
+            `setting_key` VARCHAR(50) PRIMARY KEY,
+            `setting_value` TEXT NULL,
+            `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
     ];
 
@@ -217,7 +238,8 @@ try {
         ['Kashvi Textiles', 'supplier@youshoo.com', '9820011223', $passwordSeller, 'supplier'],
         ['Vaidehi Fashion Hub', 'vaidehi@youshoo.com', '9820044556', $passwordSeller, 'supplier'],
         ['Urban Kidz Store', 'urbankids@youshoo.com', '9820077889', $passwordSeller, 'supplier'],
-        ['Home Bliss Living', 'homebliss@youshoo.com', '9820099001', $passwordSeller, 'supplier']
+        ['Home Bliss Living', 'homebliss@youshoo.com', '9820099001', $passwordSeller, 'supplier'],
+        ['Priya Sharma', 'customer@youshoo.com', '9123456780', $passwordUser, 'customer']
     ];
 
     $stmtUserCheck = $pdo->prepare("SELECT id FROM users WHERE email = ?");
@@ -240,12 +262,12 @@ try {
     // 5. Seed Suppliers
     $suppliersData = [
         [
-            'user_id' => $userIds['supplier@meesho.com'],
+            'user_id' => $userIds['supplier@youshoo.com'],
             'shop_name' => 'Kashvi Sarees & Ethnic',
             'owner_name' => 'Rameshwar Patel',
             'gstin' => '24ABCDE1234F1Z5',
             'phone' => '9820011223',
-            'business_email' => 'supplier@meesho.com',
+            'business_email' => 'supplier@youshoo.com',
             'address' => 'Ring Road Textile Market, Surat',
             'city' => 'Surat',
             'state' => 'Gujarat',
@@ -254,12 +276,12 @@ try {
             'followers_count' => 1420
         ],
         [
-            'user_id' => $userIds['vaidehi@meesho.com'],
+            'user_id' => $userIds['vaidehi@youshoo.com'],
             'shop_name' => 'Vaidehi Trends',
             'owner_name' => 'Sunita Agarwal',
             'gstin' => '27XYZAB9876G2Z1',
             'phone' => '9820044556',
-            'business_email' => 'vaidehi@meesho.com',
+            'business_email' => 'vaidehi@youshoo.com',
             'address' => 'Chawri Bazar, Chandni Chowk',
             'city' => 'New Delhi',
             'state' => 'Delhi',
@@ -268,12 +290,12 @@ try {
             'followers_count' => 890
         ],
         [
-            'user_id' => $userIds['urbankids@meesho.com'],
+            'user_id' => $userIds['urbankids@youshoo.com'],
             'shop_name' => 'Urban Kidz Apparel',
             'owner_name' => 'Amit Verma',
             'gstin' => '29PQRST5678H3Z8',
             'phone' => '9820077889',
-            'business_email' => 'urbankids@meesho.com',
+            'business_email' => 'urbankids@youshoo.com',
             'address' => 'Chickpet Commercial Area',
             'city' => 'Bengaluru',
             'state' => 'Karnataka',
@@ -282,12 +304,12 @@ try {
             'followers_count' => 610
         ],
         [
-            'user_id' => $userIds['homebliss@meesho.com'],
+            'user_id' => $userIds['homebliss@youshoo.com'],
             'shop_name' => 'Home Bliss Living',
             'owner_name' => 'Kavita Sengupta',
             'gstin' => '19LMNOP4321J4Z3',
             'phone' => '9820099001',
-            'business_email' => 'homebliss@meesho.com',
+            'business_email' => 'homebliss@youshoo.com',
             'address' => 'Burrabazar Craft Row',
             'city' => 'Kolkata',
             'state' => 'West Bengal',
@@ -810,7 +832,7 @@ try {
             $sampleReviews = [
                 ['Ananya K.', 5, 'Superb quality! Exactly like shown in pictures. The fabric is very soft and looks grand for the price! Will order again.', 34],
                 ['Deepak M.', 4, 'Very fast delivery within 3 days. Fitting is perfect and stitch quality is neat. Value for money.', 19],
-                ['Komal R.', 5, 'Meesho delivered earlier than expected! Awesome fitting and beautiful color shine. 100% recommended!', 42]
+                ['Komal R.', 5, 'Youshoo delivered earlier than expected! Awesome fitting and beautiful color shine. 100% recommended!', 42]
             ];
             foreach ($sampleReviews as $rev) {
                 $stmtReviewInsert->execute([$productId, null, $rev[0], $rev[1], $rev[2], $rev[3]]);
@@ -827,7 +849,7 @@ try {
         // Fetch first 2 products
         $prods = $pdo->query("SELECT id, supplier_id, title, price FROM products LIMIT 3")->fetchAll();
         if (count($prods) >= 2) {
-            $orderNum1 = "MEESH-" . strtoupper(bin2hex(random_bytes(4)));
+            $orderNum1 = "YSH-" . strtoupper(bin2hex(random_bytes(4)));
             $total1 = $prods[0]['price'];
             $stmtOrd = $pdo->prepare("INSERT INTO orders 
                 (order_number, user_id, total_amount, discount_amount, delivery_fee, final_amount, payment_method, payment_status, order_status, shipping_name, shipping_phone, shipping_address, shipping_city, shipping_state, shipping_pincode) 
@@ -840,7 +862,7 @@ try {
                 ->execute([$ordId1, $prods[0]['supplier_id'], $prods[0]['id'], $prods[0]['title'], $pImg1 ?: '', $prods[0]['price'], $prods[0]['price']]);
 
             // Order 2 (Delivered)
-            $orderNum2 = "MEESH-" . strtoupper(bin2hex(random_bytes(4)));
+            $orderNum2 = "YSH-" . strtoupper(bin2hex(random_bytes(4)));
             $total2 = $prods[1]['price'];
             $stmtOrd->execute([$orderNum2, $total2, $total2]);
             $ordId2 = $pdo->lastInsertId();

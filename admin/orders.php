@@ -4,11 +4,19 @@
  */
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/auth_helper.php';
+require_once __DIR__ . '/../includes/whatsapp_helper.php';
 
 require_admin();
 
 $pdo = getDBConnection();
 $msg = '';
+
+// Handle Resend WhatsApp Notification
+if (isset($_GET['action']) && $_GET['action'] === 'resend_wa' && !empty($_GET['order_id'])) {
+    $resendOrdId = (int)$_GET['order_id'];
+    $waResults = notify_sellers_for_order($resendOrdId);
+    $msg = "WhatsApp order alerts dispatched to " . count($waResults) . " seller(s)!";
+}
 
 // Handle status updates
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_order_status'])) {
@@ -72,6 +80,7 @@ $orders = $stmt->fetchAll();
         <li class="dash-nav-item"><a href="/MEESHO/admin/categories.php"><i class="fas fa-tags"></i> Category Master</a></li>
         <li class="dash-nav-item active"><a href="/MEESHO/admin/orders.php"><i class="fas fa-shopping-cart"></i> Global Orders</a></li>
         <li class="dash-nav-item"><a href="/MEESHO/admin/banners.php"><i class="fas fa-images"></i> Marketing Banners</a></li>
+        <li class="dash-nav-item"><a href="/MEESHO/admin/whatsapp_settings.php"><i class="fab fa-whatsapp"></i> WhatsApp Settings</a></li>
         <li class="dash-nav-item"><a href="/MEESHO/index.php" target="_blank"><i class="fas fa-external-link-alt"></i> Customer Storefront</a></li>
         <li class="dash-nav-item" style="margin-top:30px;"><a href="/MEESHO/logout.php" style="color:#f87171;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
       </ul>
@@ -82,6 +91,11 @@ $orders = $stmt->fetchAll();
         <div>
           <h1 style="font-size:24px; font-weight:800; color:#222;">Global Platform Orders</h1>
           <p style="font-size:13px; color:#666;">Track every customer order across all suppliers, override tracking and payment statuses</p>
+        </div>
+        <div>
+          <a href="/MEESHO/admin/whatsapp_settings.php" style="background:#25d366; color:#fff; padding:9px 16px; border-radius:6px; font-size:12.5px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(37,211,102,0.3);">
+            <i class="fab fa-whatsapp"></i> WhatsApp Gateway & Logs
+          </a>
         </div>
       </div>
 
@@ -118,16 +132,22 @@ $orders = $stmt->fetchAll();
               <th>Amount</th>
               <th>Payment</th>
               <th>Status</th>
+              <th>WhatsApp Alert</th>
               <th>Change Status</th>
             </tr>
           </thead>
           <tbody>
             <?php if (empty($orders)): ?>
               <tr>
-                <td colspan="7" style="text-align:center; padding:40px; color:#888;">No orders found matching filters.</td>
+                <td colspan="8" style="text-align:center; padding:40px; color:#888;">No orders found matching filters.</td>
               </tr>
             <?php else: ?>
-              <?php foreach ($orders as $ord): ?>
+              <?php foreach ($orders as $ord): 
+                // Check WhatsApp log for this order
+                $stmtCheckWa = $pdo->prepare("SELECT status, recipient_phone, recipient_name FROM whatsapp_logs WHERE order_id = ? ORDER BY id DESC LIMIT 1");
+                $stmtCheckWa->execute([$ord['id']]);
+                $waLog = $stmtCheckWa->fetch();
+              ?>
                 <tr>
                   <td>
                     <strong><?php echo htmlspecialchars($ord['order_number']); ?></strong>
@@ -154,6 +174,25 @@ $orders = $stmt->fetchAll();
                     <span class="status-badge <?php echo htmlspecialchars($ord['order_status']); ?>">
                       <?php echo ucwords(str_replace('_', ' ', $ord['order_status'])); ?>
                     </span>
+                  </td>
+                  <td>
+                    <?php if ($waLog): ?>
+                      <div>
+                        <?php if ($waLog['status'] === 'sent'): ?>
+                          <span style="background:#dcfce7; color:#15803d; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:10px;">Sent</span>
+                        <?php else: ?>
+                          <span style="background:#fef3c7; color:#92400e; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:10px;">Active</span>
+                        <?php endif; ?>
+                        <div style="font-size:11px; color:#666; margin-top:2px;">To: +<?php echo htmlspecialchars($waLog['recipient_phone']); ?></div>
+                      </div>
+                    <?php else: ?>
+                      <span style="color:#888; font-size:11px;">Not Logged</span>
+                    <?php endif; ?>
+                    <div style="margin-top:4px;">
+                      <a href="/MEESHO/admin/orders.php?action=resend_wa&order_id=<?php echo $ord['id']; ?>" style="color:#25d366; font-size:11px; font-weight:700; text-decoration:none;">
+                        <i class="fab fa-whatsapp"></i> Re-notify Seller
+                      </a>
+                    </div>
                   </td>
                   <td>
                     <form action="/MEESHO/admin/orders.php" method="POST" style="display:flex; gap:6px;">
